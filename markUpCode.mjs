@@ -93,7 +93,7 @@ export default class MarkUpCode {
 			background-color: #044aa308;
 		}
 
-		/* after the first child */
+		/* after the first child
 		[dropdown-item-checked] ::after {
 			position: absolute;
 			right: 0.8rem;
@@ -108,8 +108,23 @@ export default class MarkUpCode {
 			-ms-transform: rotate(45deg);
 			-webkit-transform: rotate(45deg);
 			border-color: black;
-		}
+		}*/
 
+		.count {
+			align-items: center;
+			background-color: #0e47cb;
+			border-radius: 50%;
+			color: #fff;
+			display: inline-flex;
+			font: normal normal 400 1.2rem/0.6rem arial,sans-serif;
+			height: auto;
+			justify-content: center;
+			padding: 0.75rem;
+			position: relative;
+			top: -3px;
+			text-align: center;
+			/*width: 32px;*/
+		}
 		</style>`
 	}
 
@@ -124,21 +139,16 @@ export default class MarkUpCode {
 
 	static listItem(ms, key, val, path, displayKeys, fractions) {
 		const imgHtml =  MarkUpCode.image(path, key)
-		const keyHtml =  displayKeys ? `<div>*</div>` : ""
-//		return `
-//			<li id='${ms.domElementIds.listItemPrefix}${key}' key='${key}' val='${val}' tabindex="0">
-//				<input type="checkbox">${val}
-//			</li>
-//		`
-	return `
-		<li id='${ms.domElementIds.listItemPrefix}${key}' key='${key}' val='${val}' tabindex="0">
-			${MarkUpCode.grid(fractions, `<div><input type="checkbox">${val}</div>${keyHtml}`)}
-		</li>
+		const keyHtml =  displayKeys ? `<div tabindex="0" favStar>-</div>` : ""
+		return `
+			<li id='${ms.domElementIds.listItemPrefix}${key}' key='${key}' val='${val}' tabindex="0">
+				${MarkUpCode.grid(fractions, `<div><input type="checkbox">${val}</div>${keyHtml}`)}
+			</li>
 		`
 	}
 
-	static headBoxContent(path, key, val, displayKey, fractions) {
-		return val
+	static headBoxContent(text, numba) {
+		return "<span>"+this.circledNumber(numba) + text + "</span>"
 	}
 
 	static image(path, key) {
@@ -155,6 +165,10 @@ export default class MarkUpCode {
 		const a = hasCheckbox && isMultiselect ? "<input type='checkbox'>" : ""
 		const b = hasCheckbox ? `<span>${text}</span>` : ""
 		return this.separator() + a + b
+	}
+
+	static circledNumber(number) {
+		return `<span class="count">${number}</span>`
 	}
 
 	// helper

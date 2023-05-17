@@ -1,7 +1,7 @@
 /*
 - to be implemented:
-  - fav star
-  - blue circle
+  ok - fav star
+  ok - blue circle
   - comma separated list of selections
   - ECL arrow
 	- ECL style CSS
@@ -122,6 +122,10 @@ class Element extends HTMLElement {
 		return this.#_currentText
 	}
 
+	get favoriteStar() {
+		return this.#_currentFavStar
+	}
+
 	set zindex(val) {
 		this.setAttribute("zindex", val)
 	}
@@ -176,6 +180,7 @@ class Element extends HTMLElement {
 		}			
 	}
 
+	// note: very naive. collision prone!
 	#stringHash(obj) {
 		let retVal = obj
 		if(typeof obj === "object") {
@@ -201,7 +206,11 @@ class Element extends HTMLElement {
 
 				const elId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
 				window.requestAnimationFrame(() => this.#$(elId).onclick = (ev) => {
-					this.#onListItemClick(key, val)
+					if( ev.target.hasAttribute("favStar") ) {
+						this.#setFavorite(key)
+					} else {
+						this.#onListItemClick(key, val)
+					}
 					if(this.#_isMultiselect) {
 						ev.stopPropagation()	// don't close dropdown list
 					}
@@ -214,6 +223,7 @@ class Element extends HTMLElement {
 
 				if(this.#_selected.size === 0) {	// initially (1st element)
 					this.#_currentFavStar = key
+					this.#setFavorite(key)
 					this.#select(key, val)
 					this.#invokeCallback(key, val)
 				}
@@ -256,6 +266,14 @@ class Element extends HTMLElement {
 		return null
 	}
 
+	#setFavorite(key) {
+		const currentElId = ms.domElementIds.listItemPrefix + this.#stringHash(this.#_currentFavStar)
+		const newElId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
+		console.log( this.#$(currentElId).querySelector("div [favstar]").textContent="-" )
+		console.log( this.#$(newElId).querySelector("div [favstar]").textContent="*" )
+		this.#_currentFavStar=key
+	}
+
 	#getClearButtonHtml() {
 		const uniquePrefix = Math.floor(Math.random() * 10000)
 		const id = uniquePrefix+"clearButton"
@@ -283,7 +301,11 @@ class Element extends HTMLElement {
 					}
 				} else {
 					el.removeAttribute("dropdown-item-checked")
-					el.firstElementChild.firstElementChild.firstElementChild.removeAttribute("checked")
+					if(el.firstElementChild) {
+						el.firstElementChild.firstElementChild.firstElementChild.removeAttribute("checked")
+					}
+					//console.log( el )
+					//console.log( el.firstElementChild.firstElementChild.firstElementChild )
 				}
 			}
 		} else {
@@ -297,12 +319,12 @@ class Element extends HTMLElement {
 		const selectedCount = this.#_selected.size
 		if(selectedCount === 1) {	// the case for singleselect OR multiselect w/ 1 element
 			const [key,val] = this.#_selected.entries().next().value
-			action(val, MarkUpCode.headBoxContent(this.#_imagePath, key, val, false, this.#_fractions))
+			action(val, MarkUpCode.headBoxContent(val, 1))
 		} else {
-			const text = `${selectedCount} ${this.getAttribute('selectedText') || "selected"}`
+			//const text = `${selectedCount} ${this.getAttribute('selectedText') || "selected"}`
 			const [elId, clearButtonHtml] = this.#getClearButtonHtml()
-			const html = text + "  " + clearButtonHtml
-			action(text,html)
+			const html = MarkUpCode.headBoxContent(Array.from(this.#_selected.values()).join(), selectedCount) + "  " + clearButtonHtml
+			action("bla",html)
 			// the innerHTML has to have inserted this element before attaching an evt-handler
 			window.requestAnimationFrame(() => {
 				if(this.#$(elId)) {
@@ -433,10 +455,6 @@ class Element extends HTMLElement {
 		//ev.stopPropagation()
 	
 		// note: clicks anywhere else other than this component are handled under dismissability
-	}
-
-	#setFavorite(key) {
-
 	}
 
 	#makeDismissable() {
