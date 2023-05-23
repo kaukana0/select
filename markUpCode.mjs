@@ -125,6 +125,22 @@ export default class MarkUpCode {
 			text-align: center;
 			/*width: 32px;*/
 		}
+
+		.groupHeader {
+			color: #707070;
+			font: normal normal 400 1rem/1.5rem arial,sans-serif;
+			font-weight: 700;
+			margin: 0.5rem 0;
+		}
+
+		.item {
+			color: #404040;
+			display: inline-flex;
+			font: normal normal 400 1rem/1.5rem arial,sans-serif;
+			white-space: pre-wrap;
+		}
+
+
 		</style>`
 	}
 
@@ -137,15 +153,56 @@ export default class MarkUpCode {
 		`
 	}
 
-	static listItem(ms, key, val, path, displayKeys, fractions) {
-		const imgHtml =  MarkUpCode.image(path, key)
-		const keyHtml =  displayKeys ? `<div tabindex="0" favStar>-</div>` : ""
+	static singleSelectItem(ms, key, val) {
 		return `
-			<li id='${ms.domElementIds.listItemPrefix}${key}' key='${key}' val='${val}' tabindex="0">
-				${MarkUpCode.grid(fractions, `<div><input type="checkbox">${val}</div>${keyHtml}`)}
+			<li id='${ms.domElementIds.listItemPrefix}${key}' key='${key}' val='${val}' tabindex="0" isSelectable>
+				${MarkUpCode.grid(1, `<div>${val}</div>${favHtml}`)}
 			</li>
 		`
 	}
+
+	static multiSelectItem(ms, key, val, hasFavStar=false, fractions=1) {
+		const favStarHtml =  hasFavStar ? `<div tabindex="0" favStar>-</div>` : ""
+		return `
+			<li id='${ms.domElementIds.listItemPrefix}${key}' key='${key}' val='${val}' tabindex="0" isSelectable isCheckable isCollectable>
+				${MarkUpCode.grid(fractions, `<div class="item container"><input type='checkbox' class="my-checkbox">${val}</div>${favStarHtml}`)}
+			</li>
+		`
+	}
+
+	static groupHeader(ms=null, text="", isSelectable=false) {
+		if(text==="") {
+			return this.separator()
+		} else {
+			const selHtml = isSelectable ? "<img src='img/selectall.png' style='height:1rem;'>" : ""
+			const is = isSelectable? "isSelectable" : ""
+			return this.separator() + `
+				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' tabindex="0" ${is}>
+					${MarkUpCode.grid(1, `<div class="groupHeader">${selHtml} ${text}</div>`)}
+				</li>
+			`
+		}
+	}
+
+/*
+	// use OG or LI attribute "groupStart"
+	static listItem(ms, key, val, path, hasFavStar, fractions, selectable=true, hasCheckbox=true) {
+		const imgHtml =  MarkUpCode.image(path, key)
+		const favHtml =  hasFavStar ? `<div tabindex="0" favStar>-</div>` : ""
+		let ting = selectable && hasCheckbox ? "<input type='checkbox'>" : ""
+		    ting = selectable && !hasCheckbox ? "[X]" : ting
+		const disable = selectable ? "" : "style='pointer-events:none; cursor:pointer;'"
+		const tsc = selectable ? "trigger-sel-callback" : ""
+		return `
+			<li id='${ms.domElementIds.listItemPrefix}${key}' key='${key}' val='${val}' tabindex="0" ${disable} ${tsc}>
+				${MarkUpCode.grid(fractions, `<div>${ting}${val}</div>${favHtml}`)}
+			</li>
+		`
+	}
+
+	static groupHeader(ms, text, selectable) {
+		return this.separator() + (text ? this.listItem(ms,text,text,"",false,1,selectable,false) : "")
+	}*/
 
 	static headBoxContent(text, numba) {
 		return "<span>"+this.circledNumber(numba) + text + "</span>"
@@ -160,12 +217,6 @@ export default class MarkUpCode {
 	}
 
 	static separator() { return "<hr>" }
-
-	static groupHeader(text, hasCheckbox, isMultiselect) {
-		const a = hasCheckbox && isMultiselect ? "<input type='checkbox'>" : ""
-		const b = hasCheckbox ? `<span>${text}</span>` : ""
-		return this.separator() + a + b
-	}
 
 	static circledNumber(number) {
 		return `<span class="count">${number}</span>`

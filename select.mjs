@@ -2,16 +2,34 @@
 - to be implemented:
   ok - fav star
   ok - blue circle
-  - comma separated list of selections
+  ok - comma separated list of selections
   - ECL arrow
 	- ECL style CSS
   ok - selectionAllowed callback
   ok - group check-all checkbox
 	ok - checkbox no haken
 	- single select highlight w/o haken
+	- let user specify what is select initially (now always the first one)
 - to be removed:
 	- mini images
 	- fractions
+*/
+
+/*
+a list item's behaviour has 3 aspects:
+
+- isSelectable: call all callbacks
+- isCheckable: has a checkbox - multiselect only
+- isCollectable: collection into #_selected - multiselect only
+
+only some combinations (of the possible 2^3) are supported - i.e. make sense in this context:
+
+- single select item: isSelectable
+- multiselect item: isSelectable + isCheckable + isCollectable
+- group header w/o text: it's just a seperation line, so none of the three.
+- group header w/ text: can be isSelectable or not
+
+these aspects are encoded as attributes of the <li> items.
 */
 
 import MarkUpCode from  "./markUpCode.mjs"		// keep this file html/css free
@@ -31,14 +49,12 @@ class Element extends HTMLElement {
 
 	#_imagePath		// string; from an attribute
 	#_isMultiselect	// bool; from an attribute
-	#_onSelected		// function; from an attribute
-	#_onSelect 			// function; from an attribute; if returns false, (de)selection is prohibited, allowed in any other case
-	#_maxSelections	// from an attribute
+	#_onSelect 			// function; from an attribute; callback before a selection happens; if returns false, (de)selection is avoided, allowed in any other case
+	#_onSelected		// function; from an attribute; callback after a selection happened
 	#_favoriteStar	// bool; from an attribute; for each entry, show fav star on the right side in the line area
 	#_currentFavStar	// key of current favourite
 	#_fractions		// # of fractions of left side of the listitem list (relevent only for favoriteStar. see docu.md)
 	#_selected = new Map()
-	#_currentText	// textual representation of what's shown in headBox
 	#_isLocked		// if true, user can't influece selection and no callback will be invoked
 	#_orderedItems	// for instance ["European Union","Austria",...]
 	#_isInitialized
@@ -52,7 +68,6 @@ class Element extends HTMLElement {
 
 		this.#_isInitialized = false
 		this.#_isLocked = false
-		this.#_maxSelections = 10
 		this.#_orderedItems = []
 		this.#_currentFavStar = ""
 
@@ -76,7 +91,6 @@ class Element extends HTMLElement {
 	connectedCallback() {
 		this.#_imagePath = this.getAttribute('imagePath') || ""
 		this.#_isMultiselect = this.hasAttribute('multiselect') ? true : false
-		this.#_maxSelections = this.hasAttribute('maxSelections') ? this.getAttribute('maxSelections') : 10
 		this.#_favoriteStar = this.hasAttribute('favoriteStar') ? true : false
 		this.#_fractions = this.hasAttribute('fractions') ? this.getAttribute('fractions') : 3
 		if(!this.#_isInitialized) {
@@ -87,39 +101,46 @@ class Element extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		console.debug("dropdownBox: disconnected")
+		console.debug("ecl-like-select-x: disconnected")
 	}
 
 	set data(val) {
 		this.#fill(val[0], val[1])
 	}
 
-	set onSelected(val) {
-		this.#_onSelected = val
-	}
-
 	set onSelect(val) {
 		this.#_onSelect = val
 	}
 
-	set selectedText(val) {
-		this.setAttribute('selectedText', val)
+	set onSelected(val) {
+		this.#_onSelected = val
 	}
 
-	set maxSelections(val) {
-		this.setAttribute('maxSelections', val)
-	}
-
-	get selectedText() {
-		return this.getAttribute('selectedText')
+	set selected(keys) {
+		if(typeof keys !== "undefined" && keys!==null) {
+			if(keys.size===0) {
+				this.#deselectAll()
+				// nothing else to do
+			} else {
+				let isFirst = true
+				for(let key of keys) {
+					const val = this.#getValueByKey(key)
+					if(val!==null) {
+						if(isFirst) {
+							isFirst = false
+							this.#deselectAll()
+						}
+						this.#selectOne(key,val,false)
+					} else {
+						console.warn(`ecl-like-select-x: set selected - key ${key} doesn't exist.`)
+					}
+				}
+			}
+		}
 	}
 
 	get selected() {
 		return this.#_selected
-	}
-
-	get currentText() {
-		return this.#_currentText
 	}
 
 	get favoriteStar() {
@@ -130,36 +151,25 @@ class Element extends HTMLElement {
 		this.setAttribute("zindex", val)
 	}
 
-	setLocked(isLocked) {
+	set locked(isLocked) {
 		this.#_isLocked = isLocked
 	}
 
-	setSelectedByKey(key) {
-		if(typeof key !== "undefined" && key!==null) {
-			const val = this.#getValueByKey(key)
-			if(val!==null) {
-				this.#deselectAll()
-				this.#select(key,val)
-			} else {
-				console.warn(`dropdownBox: setSelectedByKey - key ${key} doesn't exist.`)
-			}
-		}
-	}
 
 	static get observedAttributes() {
-		return ['data', 'onSelect', 'onSelected', 'imagePath', 'multiselect', 'maxselections', 'zindex']
+		return ['data', 'onSelect', 'onSelected', 'imagePath', 'multiselect', 'zindex']
 	}
 
 	attributeChangedCallback(name, oldVal, newVal) {
-		if (name === 'data' || name === 'onSelected') {
-			console.warn("dropdownBox: setting "+name+" via html attribute is being ignored. please use js property instead.")
+		if (["onSelected", "onSelect", "data"].includes(name)) {
+			console.warn("ecl-like-select-x: setting "+name+" via html attribute is being ignored. please use js property instead.")
 		}
 		if (name === 'imagePath') {
 			if(this.#_imagePath === undefined) {
 				this.#_imagePath = newVal
 				// todo: clear and re-fill
 			} else {
-				console.warn("dropdownBox: setting imagePath works only one time. It's ignored now.")
+				console.warn("ecl-like-select-x: setting imagePath works only one time. It's ignored now.")
 			}
 		}
 		if(name === 'multiselect') {
@@ -167,12 +177,6 @@ class Element extends HTMLElement {
 			// warning: switch to off while multiple items are selected is untested.
 			this.connectedCallback()
 		}
-		if(name === 'maxselections') {
-			if(newVal) {
-				this.#_maxSelections = parseInt(newVal)
-				this.#resetSelections()	// alternatively, implement removing excessive ones
-			}
-		}			
 		if(name === 'zindex') {
 			if(newVal) {
 				this.#$(ms.domElementIds.list).style.zIndex=newVal
@@ -183,7 +187,7 @@ class Element extends HTMLElement {
 	// note: very naive. collision prone!
 	#stringHash(obj) {
 		let retVal = obj
-		if(typeof obj === "object") {
+		if(typeof obj === "object" && obj!==null) {
 			retVal=""
 			const str = JSON.stringify(obj)
 			let i=1
@@ -197,16 +201,36 @@ class Element extends HTMLElement {
 	// note: the purpose of using requestAnimationFrame() here is to make sure 
 	// that an element - which we want to access - actually exists.
 	// seems that .innerHTML takes a while "asynchroneously"...
+	// TODO: function is too big...
 	#fill(itemsMap, groupChanges) {
 		if(itemsMap) {
 			for (const [key, val] of itemsMap.entries()) {
 
+				// TODO: no line if 1st in list
+				if(groupChanges && groupChanges.has(key)) {
+					const text = typeof groupChanges.get(key).text === "undefined" ? "" : groupChanges.get(key).text
+					const selectable = typeof groupChanges.get(key).selectable === "undefined" ? false : groupChanges.get(key).selectable
+					this.#$(ms.domElementIds.list).innerHTML += MarkUpCode.groupHeader(ms, text, selectable)
+					if(selectable) {
+						const elId = ms.domElementIds.listItemPrefix + text
+						window.requestAnimationFrame(() => this.#$(elId).onclick = (ev) => {
+							this.#onListItemClick(text, text)
+							ev.stopPropagation()	// don't close dropdown list
+						})
+					}
+				}
+
 				this.#_orderedItems.push(val)
-				this.#$(ms.domElementIds.list).innerHTML += MarkUpCode.listItem(ms, this.#stringHash(key), val, this.#_imagePath, this.#_favoriteStar, this.#_fractions)
+
+				if(this.#_isMultiselect) {
+					this.#$(ms.domElementIds.list).innerHTML += MarkUpCode.multiSelectItem(ms, this.#stringHash(key), val, this.#_favoriteStar, this.#_fractions)
+				} else {
+					this.#$(ms.domElementIds.list).innerHTML += MarkUpCode.singleSelectItem(ms, this.#stringHash(key), val)
+				}
 
 				const elId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
 				window.requestAnimationFrame(() => this.#$(elId).onclick = (ev) => {
-					if( ev.target.hasAttribute("favStar") ) {
+					if( ev.target.hasAttribute("favstar") ) {
 						this.#setFavorite(key)
 					} else {
 						this.#onListItemClick(key, val)
@@ -224,18 +248,13 @@ class Element extends HTMLElement {
 				if(this.#_selected.size === 0) {	// initially (1st element)
 					this.#_currentFavStar = key
 					this.#setFavorite(key)
-					this.#select(key, val)
+					this.#selectOne(key, val)
 					this.#invokeCallback(key, val)
 				}
 
-				if(groupChanges && groupChanges[key]) {
-					const text = typeof groupChanges[key].text === "undefined" ? "" : groupChanges[key].text
-					const checkbox = typeof groupChanges[key].selectable === "undefined" ? false : groupChanges[key].selectable
-					this.#$(ms.domElementIds.list).innerHTML += MarkUpCode.groupHeader(text, checkbox, this.#_isMultiselect)
-				}
 			}
 		} else {
-			throw Error("dropdownBox: empty input")
+			throw Error("ecl-like-select-x: empty input")
 		}
 	}
 
@@ -247,30 +266,39 @@ class Element extends HTMLElement {
 		return null
 	}
 
-	#select(key, val) {
+	#selectOne(key, val, clear=true) {
 		const elId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
-		//console.log(elId)
-		this.#_selected.clear()
-		this.#_selected.set(key,val)
+		const el = this.#$(elId)
+
+		if(clear) {	this.#_selected.clear() }
+		if(el.hasAttribute("isCollectable")) { this.#_selected.set(key,val)	}
 		this.#updateHeadBoxContent()
-		this.#$(elId).setAttribute("dropdown-item-checked","")
-		this.#$(elId).firstElementChild.firstElementChild.firstElementChild.setAttribute("checked","")
+		this.#setChecked(el, true)
+	}
+
+	#setChecked(el, isChecked) {
+		if(el.hasAttribute("isCheckable")) {
+			if(isChecked) {
+				el.firstElementChild.firstElementChild.firstElementChild.setAttribute("checked", true)
+			} else {
+				el.firstElementChild.firstElementChild.firstElementChild.removeAttribute("checked")
+			}
+		}
 	}
 
 	#deselectAll() {
-		var items = this.#$(ms.domElementIds.list).getElementsByTagName("li");
-		for (var i = 0; i < items.length; ++i) {
-			items[i].removeAttribute("dropdown-item-checked")
-			items[i].firstElementChild.firstElementChild.firstElementChild.removeAttribute("checked")
+		for (var [key, val] of this.#_selected) {
+			const el = this.#$( ms.domElementIds.listItemPrefix + this.#stringHash(key) )
+			this.#setChecked(el, false)
 		}
-		return null
+		this.#_selected.clear()
 	}
 
 	#setFavorite(key) {
 		const currentElId = ms.domElementIds.listItemPrefix + this.#stringHash(this.#_currentFavStar)
 		const newElId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
-		console.log( this.#$(currentElId).querySelector("div [favstar]").textContent="-" )
-		console.log( this.#$(newElId).querySelector("div [favstar]").textContent="*" )
+		this.#$(currentElId).querySelector("div [favstar]").textContent="-"
+		this.#$(newElId).querySelector("div [favstar]").textContent="*"
 		this.#_currentFavStar=key
 	}
 
@@ -282,67 +310,10 @@ class Element extends HTMLElement {
 		return [id, retVal]
 	}
 
-	#resetSelections() {
-		if(this.#_isLocked) return
-
-		if(this.#_isMultiselect) {
-			let isFirst = true
-			for(const el of this.#$(ms.domElementIds.list).children) {
-				if(isFirst) {
-					isFirst = false
-					const firstBorn = this.#$(ms.domElementIds.list).children[0]
-					const key = firstBorn.getAttribute("key")
-					const val = firstBorn.getAttribute("val")
-					if(this.#_onSelect && this.#_onSelect(key, val)===false) {
-						// nop
-					} else {
-						this.#invokeCallback(key, val)
-						this.#select(key, val)
-					}
-				} else {
-					el.removeAttribute("dropdown-item-checked")
-					if(el.firstElementChild) {
-						el.firstElementChild.firstElementChild.firstElementChild.removeAttribute("checked")
-					}
-					//console.log( el )
-					//console.log( el.firstElementChild.firstElementChild.firstElementChild )
-				}
-			}
-		} else {
-			console.error("dropdownBox: Reset despite Single-select mode. How did that happen!?")
-		}
-	}
-
 	#updateHeadBoxContent() {
-		const that = this
-		
 		const selectedCount = this.#_selected.size
-		if(selectedCount === 1) {	// the case for singleselect OR multiselect w/ 1 element
-			const [key,val] = this.#_selected.entries().next().value
-			action(val, MarkUpCode.headBoxContent(val, 1))
-		} else {
-			//const text = `${selectedCount} ${this.getAttribute('selectedText') || "selected"}`
-			const [elId, clearButtonHtml] = this.#getClearButtonHtml()
-			const html = MarkUpCode.headBoxContent(Array.from(this.#_selected.values()).join(), selectedCount) + "  " + clearButtonHtml
-			action("bla",html)
-			// the innerHTML has to have inserted this element before attaching an evt-handler
-			window.requestAnimationFrame(() => {
-				if(this.#$(elId)) {
-					this.#$(elId).onclick = (ev) => {
-						this.#resetSelections()
-						ev.stopPropagation()	// don't toggle dropdown
-					}
-				} else {
-					console.debug(`dropdownBox: element w/ id ${elId} doesn't exist`)
-				}
-			})
-		}
-
-		function action(text, html) {
-			that.#_currentText = text
-			that.#$(ms.domElementIds.headBoxContent).innerHTML = html
-		}
-
+		const html = MarkUpCode.headBoxContent(Array.from(this.#_selected.values()).join(), selectedCount)
+		this.#$(ms.domElementIds.headBoxContent).innerHTML = html
 	}
 
 	#onListItemClick(key, val, invokeCallback=true) {
@@ -362,27 +333,23 @@ class Element extends HTMLElement {
 			if(that.#_selected.has(key)) {
 				if(that.#_selected.size > 1) {
 					that.#_selected.delete(key)
-					that.#$(elId).removeAttribute("dropdown-item-checked")
-					that.#$(elId).firstElementChild.firstElementChild.firstElementChild.removeAttribute("checked")
+					//that.#$(elId).firstElementChild.firstElementChild.firstElementChild.removeAttribute("checked")
+					that.#setChecked(that.#$(elId), false)
 					action()
 				} else {
 					// nop (at least 1 has to be selected at all times)
 				}
 			} else {
 				if(that.#_onSelect && that.#_onSelect(key,val)===false) {return} 
-				if(that.#_selected.size < that.#_maxSelections) {
-					that.#_selected.set(key,val)
-					alignOrderOfSelectedItems()
-					that.#$(elId).setAttribute("dropdown-item-checked","")
-					that.#$(elId).firstElementChild.firstElementChild.firstElementChild.setAttribute("checked", true)
+				that.#selectOne(key, val, false)
+				alignOrderOfSelectedItems()
+				if(that.#$(elId).hasAttribute("isSelectable")) {
 					action()
-				} else {
-					// max number of selectable items reached
 				}
 			}
 		}
 
-		function alignOrderOfSelectedItems() {		// ...to the order of dropdownBox items - and do it by value
+		function alignOrderOfSelectedItems() {		// ...to the order of ecl-like-select-x items - and do it by value
 			that.#_selected = new Map([...that.#_selected.entries()].sort(
 				(e,f) => {
 					const a = that.#_orderedItems.findIndex(_e => _e === Object.entries(f)[0][1])
@@ -396,12 +363,7 @@ class Element extends HTMLElement {
 			const elId = ms.domElementIds.listItemPrefix + key
 			const selectionChanged = key !== that.#_selected.keys().next().value
 			if(selectionChanged) {
-				// deselect current
-				that.#getCurrentlySingleSelectedElement().removeAttribute("dropdown-item-checked")
-				// memorize and select new one
-				that.#_selected.clear()
-				that.#_selected.set(key,val)
-				that.#$(elId).setAttribute("dropdown-item-checked","")
+				that.#selectOne(key,val)
 				action()
 			} else {
 				// nop
@@ -420,14 +382,14 @@ class Element extends HTMLElement {
 		if(this.#_onSelected !== undefined) {
 			this.#_onSelected(key, val)
 		} else {
-			console.debug("dropdownBox: No onSelected callback")
+			console.debug("ecl-like-select-x: No onSelected callback")
 		}
 	}
 
 	#getCurrentlySingleSelectedElement() {
 		if(this.#_selected.size>0) {
 			if(this.#_isMultiselect) {
-				console.warn("dropdownBox: not a single-select box")
+				console.warn("ecl-like-select-x: not a single-select box")
 				return
 			} else {
 				const selecedElId = ms.domElementIds.listItemPrefix + this.#_selected.keys().next().value
