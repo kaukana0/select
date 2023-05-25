@@ -139,8 +139,6 @@ export default class MarkUpCode {
 			font: normal normal 400 1rem/1.5rem arial,sans-serif;
 			white-space: pre-wrap;
 		}
-
-
 		</style>`
 	}
 
@@ -155,8 +153,8 @@ export default class MarkUpCode {
 
 	static singleSelectItem(ms, key, val) {
 		return `
-			<li id='${ms.domElementIds.listItemPrefix}${key}' key='${key}' val='${val}' tabindex="0" isSelectable>
-				${MarkUpCode.grid(1, `<div>${val}</div>${favHtml}`)}
+			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable>
+				${MarkUpCode.grid(1, `<div>${val}</div>`)}
 			</li>
 		`
 	}
@@ -164,7 +162,7 @@ export default class MarkUpCode {
 	static multiSelectItem(ms, key, val, hasFavStar=false, fractions=1) {
 		const favStarHtml =  hasFavStar ? `<div tabindex="0" favStar>-</div>` : ""
 		return `
-			<li id='${ms.domElementIds.listItemPrefix}${key}' key='${key}' val='${val}' tabindex="0" isSelectable isCheckable isCollectable>
+			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable isCheckable isCollectable>
 				${MarkUpCode.grid(fractions, `<div class="item container"><input type='checkbox' class="my-checkbox">${val}</div>${favStarHtml}`)}
 			</li>
 		`
@@ -174,11 +172,12 @@ export default class MarkUpCode {
 		if(text==="") {
 			return this.separator()
 		} else {
-			const selHtml = isSelectable ? "<img src='img/selectall.png' style='height:1rem;'>" : ""
+			const sel = isSelectable ? "<img src='img/selectall.png' style='height:1rem;'>" : ""
 			const is = isSelectable? "isSelectable" : ""
+			const style = isSelectable ? "" : "pointer-events:none;"
 			return this.separator() + `
-				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' tabindex="0" ${is}>
-					${MarkUpCode.grid(1, `<div class="groupHeader">${selHtml} ${text}</div>`)}
+				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' tabindex="0" ${is} style="${style}">
+					${MarkUpCode.grid(1, `<div class="groupHeader">${sel} ${text}</div>`)}
 				</li>
 			`
 		}

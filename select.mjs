@@ -5,14 +5,16 @@
   ok - comma separated list of selections
   - ECL arrow
 	- ECL style CSS
+	- ECL style checkbox
+	- fav Star image
+	- test single-select mode
   ok - selectionAllowed callback
   ok - group check-all checkbox
 	ok - checkbox no haken
-	- single select highlight w/o haken
+	ok - single select highlight w/o haken
 	- let user specify what is select initially (now always the first one)
 - to be removed:
-	- mini images
-	- fractions
+	ok - mini images
 */
 
 /*
@@ -51,7 +53,7 @@ class Element extends HTMLElement {
 	#_isMultiselect	// bool; from an attribute
 	#_onSelect 			// function; from an attribute; callback before a selection happens; if returns false, (de)selection is avoided, allowed in any other case
 	#_onSelected		// function; from an attribute; callback after a selection happened
-	#_favoriteStar	// bool; from an attribute; for each entry, show fav star on the right side in the line area
+	#_hasFavoriteStar	// bool; from an attribute; for each entry, show fav star on the right side in the line area
 	#_currentFavStar	// key of current favourite
 	#_fractions		// # of fractions of left side of the listitem list (relevent only for favoriteStar. see docu.md)
 	#_selected = new Map()
@@ -91,7 +93,7 @@ class Element extends HTMLElement {
 	connectedCallback() {
 		this.#_imagePath = this.getAttribute('imagePath') || ""
 		this.#_isMultiselect = this.hasAttribute('multiselect') ? true : false
-		this.#_favoriteStar = this.hasAttribute('favoriteStar') ? true : false
+		this.#_hasFavoriteStar = this.hasAttribute('favoriteStar') ? true : false
 		this.#_fractions = this.hasAttribute('fractions') ? this.getAttribute('fractions') : 3
 		if(!this.#_isInitialized) {
 			this.#registerEvents()	
@@ -116,9 +118,10 @@ class Element extends HTMLElement {
 		this.#_onSelected = val
 	}
 
+	// keys = []
 	set selected(keys) {
 		if(typeof keys !== "undefined" && keys!==null) {
-			if(keys.size===0) {
+			if(keys.length===0) {
 				this.#deselectAll()
 				// nothing else to do
 			} else {
@@ -132,7 +135,7 @@ class Element extends HTMLElement {
 						}
 						this.#selectOne(key,val,false)
 					} else {
-						console.warn(`ecl-like-select-x: set selected - key ${key} doesn't exist.`)
+						console.warn(`ecl-like-select-x: set selected - key "${key}" doesn't exist.`)
 					}
 				}
 			}
@@ -223,7 +226,7 @@ class Element extends HTMLElement {
 				this.#_orderedItems.push(val)
 
 				if(this.#_isMultiselect) {
-					this.#$(ms.domElementIds.list).innerHTML += MarkUpCode.multiSelectItem(ms, this.#stringHash(key), val, this.#_favoriteStar, this.#_fractions)
+					this.#$(ms.domElementIds.list).innerHTML += MarkUpCode.multiSelectItem(ms, this.#stringHash(key), val, this.#_hasFavoriteStar, this.#_fractions)
 				} else {
 					this.#$(ms.domElementIds.list).innerHTML += MarkUpCode.singleSelectItem(ms, this.#stringHash(key), val)
 				}
@@ -246,8 +249,10 @@ class Element extends HTMLElement {
 				})
 
 				if(this.#_selected.size === 0) {	// initially (1st element)
-					this.#_currentFavStar = key
-					this.#setFavorite(key)
+					if( this.#_hasFavoriteStar ) {
+						this.#_currentFavStar = key
+						this.#setFavorite(key)
+					}
 					this.#selectOne(key, val)
 					this.#invokeCallback(key, val)
 				}
@@ -258,10 +263,11 @@ class Element extends HTMLElement {
 		}
 	}
 
+	// you wanna search everything, go thorugh the DOM as there's no other list in here which is exhaustive
 	#getValueByKey(key) {
 		var items = this.#$(ms.domElementIds.list).getElementsByTagName("li");
 		for (var i = 0; i < items.length; ++i) {
-			if(items[i].getAttribute("key") == key) {return items[i].getAttribute("val")}
+			if(items[i].getAttribute("key") === key) {return items[i].getAttribute("val")}
 		}
 		return null
 	}
@@ -271,9 +277,13 @@ class Element extends HTMLElement {
 		const el = this.#$(elId)
 
 		if(clear) {	this.#_selected.clear() }
-		if(el.hasAttribute("isCollectable")) { this.#_selected.set(key,val)	}
-		this.#updateHeadBoxContent()
-		this.#setChecked(el, true)
+		if(el) {
+			if(el.hasAttribute("isCollectable")) { this.#_selected.set(key,val)	}
+			this.#updateHeadBoxContent()
+			this.#setChecked(el, true)
+		} else {
+			console.warn("ecl-like-select-x: can't select missing element", elId)
+		}
 	}
 
 	#setChecked(el, isChecked) {
