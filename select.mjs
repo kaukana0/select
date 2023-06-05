@@ -111,12 +111,17 @@ class Element extends HTMLElement {
 	}
 
 	set onSelect(val) {
+		if(this.#_onSelect) { console.debug("select: onSelect already set") }
 		this.#_onSelect = val
 	}
 
 	set onSelected(val) {
+		if(this.#_onSelected) { console.debug("select: onSelected already set") }
 		this.#_onSelected = val
 	}
+
+	get onSelected() { return this.#_onSelected }
+	get onSelect() { return this.#_onSelect }
 
 	// keys = []
 	set selected(keys) {
@@ -275,12 +280,11 @@ class Element extends HTMLElement {
 	#selectOne(key, val, clear=true) {
 		const elId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
 		const el = this.#$(elId)
-
 		if(clear) {	this.#_selected.clear() }
 		if(el) {
-			if(el.hasAttribute("isCollectable")) { this.#_selected.set(key,val)	}
-			this.#updateHeadBoxContent()
+			if(el.hasAttribute("isCollectable")) { this.#_selected.set(key,val) }
 			this.#setChecked(el, true)
+			this.#updateHeadBoxContent()
 		} else {
 			console.warn("ecl-like-select-x: can't select missing element", elId)
 		}
