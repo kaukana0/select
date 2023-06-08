@@ -204,7 +204,11 @@ export default class MarkUpCode {
 	}*/
 
 	static headBoxContent(text, numba) {
-		return "<span>"+this.circledNumber(numba) + text + "</span>"
+		if(numba===null) {
+			return "<span>" + text + "</span>"
+		} else {
+			return "<span>"+this.circledNumber(numba) + text + "</span>"
+		}
 	}
 
 	static image(path, key) {

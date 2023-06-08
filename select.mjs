@@ -22,7 +22,7 @@ a list item's behaviour has 3 aspects:
 
 - isSelectable: call all callbacks
 - isCheckable: has a checkbox - multiselect only
-- isCollectable: collection into #_selected - multiselect only
+- isCollectable: #_selected.length can be >1 - multiselect only
 
 only some combinations (of the possible 2^3) are supported - i.e. make sense in this context:
 
@@ -125,6 +125,7 @@ class Element extends HTMLElement {
 
 	// keys = []
 	set selected(keys) {
+		//console.log(keys)	//TODO: why is this undefined? (context: test insertAndHookUpBoxes)
 		if(typeof keys !== "undefined" && keys!==null) {
 			if(keys.length===0) {
 				this.#deselectAll()
@@ -138,7 +139,7 @@ class Element extends HTMLElement {
 							isFirst = false
 							this.#deselectAll()
 						}
-						this.#selectOne(key,val,false)
+						this.#selectOne(key,val)
 					} else {
 						console.warn(`ecl-like-select-x: set selected - key "${key}" doesn't exist.`)
 					}
@@ -277,12 +278,12 @@ class Element extends HTMLElement {
 		return null
 	}
 
-	#selectOne(key, val, clear=true) {
+	#selectOne(key, val) {
 		const elId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
 		const el = this.#$(elId)
-		if(clear) {	this.#_selected.clear() }
+		if( !el.hasAttribute("isCollectable") ) {	this.#_selected.clear() }		// max 1
 		if(el) {
-			if(el.hasAttribute("isCollectable")) { this.#_selected.set(key,val) }
+			this.#_selected.set(key,val)
 			this.#setChecked(el, true)
 			this.#updateHeadBoxContent()
 		} else {
@@ -301,9 +302,9 @@ class Element extends HTMLElement {
 	}
 
 	#deselectAll() {
-		for (var [key, val] of this.#_selected) {
-			const el = this.#$( ms.domElementIds.listItemPrefix + this.#stringHash(key) )
-			this.#setChecked(el, false)
+		var items = this.#$(ms.domElementIds.list).getElementsByTagName("li");
+		for (var i = 0; i < items.length; ++i) {
+			this.#setChecked(items[i], false)
 		}
 		this.#_selected.clear()
 	}
@@ -325,7 +326,7 @@ class Element extends HTMLElement {
 	}
 
 	#updateHeadBoxContent() {
-		const selectedCount = this.#_selected.size
+		const selectedCount = this.#_isMultiselect ? this.#_selected.size : null
 		const html = MarkUpCode.headBoxContent(Array.from(this.#_selected.values()).join(), selectedCount)
 		this.#$(ms.domElementIds.headBoxContent).innerHTML = html
 	}
@@ -355,7 +356,7 @@ class Element extends HTMLElement {
 				}
 			} else {
 				if(that.#_onSelect && that.#_onSelect(key,val)===false) {return} 
-				that.#selectOne(key, val, false)
+				that.#selectOne(key, val)
 				alignOrderOfSelectedItems()
 				if(that.#$(elId).hasAttribute("isSelectable")) {
 					action()
