@@ -124,6 +124,7 @@ class Element extends HTMLElement {
 	get onSelect() { return this.#_onSelect }
 
 	// keys = []
+	// does not invoke onSelect or onSelected
 	set selected(keys) {
 		//console.log(keys)	//TODO: why is this undefined? (context: test insertAndHookUpBoxes)
 		if(typeof keys !== "undefined" && keys!==null) {
@@ -239,6 +240,7 @@ class Element extends HTMLElement {
 
 				const elId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
 				window.requestAnimationFrame(() => this.#$(elId).onclick = (ev) => {
+
 					if( ev.target.hasAttribute("favstar") ) {
 						this.#setFavorite(key)
 					} else {

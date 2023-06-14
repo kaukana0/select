@@ -161,9 +161,12 @@ export default class MarkUpCode {
 
 	static multiSelectItem(ms, key, val, hasFavStar=false, fractions=1) {
 		const favStarHtml =  hasFavStar ? `<div tabindex="0" favStar>-</div>` : ""
+		// the pointer-events thing makes it ignore events - only from the js
+		// should it be set programatically, otherwise the ecl-like-select-x JS doesn't
+		// know that it's checked and everything goes out of sync
 		return `
 			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable isCheckable isCollectable>
-				${MarkUpCode.grid(fractions, `<div class="item container"><input type='checkbox' class="my-checkbox">${val}</div>${favStarHtml}`)}
+				${MarkUpCode.grid(fractions, `<div class="item container"><input type='checkbox' class="my-checkbox" style="pointer-events: none;">${val}</div>${favStarHtml}`)}
 			</li>
 		`
 	}
