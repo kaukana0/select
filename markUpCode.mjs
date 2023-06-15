@@ -175,7 +175,7 @@ export default class MarkUpCode {
 		if(text==="") {
 			return this.separator()
 		} else {
-			const sel = isSelectable ? "<img src='img/selectall.png' style='height:1rem;'>" : ""
+			const sel = isSelectable ? "<img src='components/select/img/selectall.png' style='height:1rem;'>" : ""
 			const is = isSelectable? "isSelectable" : ""
 			const style = isSelectable ? "" : "pointer-events:none;"
 			return this.separator() + `
@@ -185,26 +185,6 @@ export default class MarkUpCode {
 			`
 		}
 	}
-
-/*
-	// use OG or LI attribute "groupStart"
-	static listItem(ms, key, val, path, hasFavStar, fractions, selectable=true, hasCheckbox=true) {
-		const imgHtml =  MarkUpCode.image(path, key)
-		const favHtml =  hasFavStar ? `<div tabindex="0" favStar>-</div>` : ""
-		let ting = selectable && hasCheckbox ? "<input type='checkbox'>" : ""
-		    ting = selectable && !hasCheckbox ? "[X]" : ting
-		const disable = selectable ? "" : "style='pointer-events:none; cursor:pointer;'"
-		const tsc = selectable ? "trigger-sel-callback" : ""
-		return `
-			<li id='${ms.domElementIds.listItemPrefix}${key}' key='${key}' val='${val}' tabindex="0" ${disable} ${tsc}>
-				${MarkUpCode.grid(fractions, `<div>${ting}${val}</div>${favHtml}`)}
-			</li>
-		`
-	}
-
-	static groupHeader(ms, text, selectable) {
-		return this.separator() + (text ? this.listItem(ms,text,text,"",false,1,selectable,false) : "")
-	}*/
 
 	static headBoxContent(text, numba) {
 		if(numba===null) {

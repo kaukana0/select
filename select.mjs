@@ -49,7 +49,6 @@ const ms = {
 
 class Element extends HTMLElement {
 
-	#_imagePath		// string; from an attribute
 	#_isMultiselect	// bool; from an attribute
 	#_onSelect 			// function; from an attribute; callback before a selection happens; if returns false, (de)selection is avoided, allowed in any other case
 	#_onSelected		// function; from an attribute; callback after a selection happened
@@ -91,7 +90,6 @@ class Element extends HTMLElement {
 	}
 
 	connectedCallback() {
-		this.#_imagePath = this.getAttribute('imagePath') || ""
 		this.#_isMultiselect = this.hasAttribute('multiselect') ? true : false
 		this.#_hasFavoriteStar = this.hasAttribute('favoriteStar') ? true : false
 		this.#_fractions = this.hasAttribute('fractions') ? this.getAttribute('fractions') : 3
@@ -167,31 +165,24 @@ class Element extends HTMLElement {
 
 
 	static get observedAttributes() {
-		return ['data', 'onSelect', 'onSelected', 'imagePath', 'multiselect', 'zindex']
+		return ['data', 'onSelect', 'onSelected', 'style', 'multiselect', 'zindex']
 	}
 
 	attributeChangedCallback(name, oldVal, newVal) {
 		if (["onSelected", "onSelect", "data"].includes(name)) {
 			console.warn("ecl-like-select-x: setting "+name+" via html attribute is being ignored. please use js property instead.")
 		}
-		if (name === 'imagePath') {
-			if(this.#_imagePath === undefined) {
-				this.#_imagePath = newVal
-				// todo: clear and re-fill
-			} else {
-				console.warn("ecl-like-select-x: setting imagePath works only one time. It's ignored now.")
-			}
-		}
 		if(name === 'multiselect') {
 			// switch multiselect on/off.
 			// warning: switch to off while multiple items are selected is untested.
 			this.connectedCallback()
 		}
-		if(name === 'zindex') {
+		if(name === 'style') {
 			if(newVal) {
-				this.#$(ms.domElementIds.list).style.zIndex=newVal
+				// relay anyting to this element's main container
+				this.#$(ms.domElementIds.headBox).style.cssText = this.#$(ms.domElementIds.headBox).style.cssText+newVal
 			}
-		}			
+		}
 	}
 
 	// note: very naive. collision prone!
