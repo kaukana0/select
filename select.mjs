@@ -226,9 +226,10 @@ class Element extends HTMLElement {
 
 					if( ev.target.hasAttribute("favstar") ) {
 						this.#setFavorite(key)
-					} else {
-						this.#onListItemClick(key, val)
-					}
+					} 
+
+					this.#onListItemClick(key, val)
+
 					if(this.#_isMultiselect) {
 						ev.stopPropagation()	// don't close dropdown list
 					}
