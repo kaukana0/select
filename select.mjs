@@ -58,6 +58,7 @@ class Element extends HTMLElement {
 	#_selected = new Map()
 	#_isLocked		// if true, user can't influece selection and no callback will be invoked
 	#_orderedItems	// for instance ["European Union","Austria",...]
+	#_defaultSelections		// [] of keys
 	#_isInitialized
 
 	#$(elementId) {
@@ -71,6 +72,7 @@ class Element extends HTMLElement {
 		this.#_isLocked = false
 		this.#_orderedItems = []
 		this.#_currentFavStar = ""
+		this.#_defaultSelections = []
 
 		this.attachShadow({ mode: 'open' })
 		const tmp = MarkUpCode.getHtmlTemplate(MarkUpCode.mainElements(ms) + MarkUpCode.css(ms, 5)).cloneNode(true)
@@ -100,13 +102,9 @@ class Element extends HTMLElement {
 		}
 	}
 
-	disconnectedCallback() {
-		console.debug("ecl-like-select-x: disconnected")
-	}
+	disconnectedCallback() { console.debug("ecl-like-select-x: disconnected")	}
 
-	set data(val) {
-		this.#fill(val[0], val[1])
-	}
+	set data(val) {	this.#fill(val[0], val[1]) }
 
 	set onSelect(val) {
 		if(this.#_onSelect) { console.debug("select: onSelect already set") }
@@ -147,21 +145,15 @@ class Element extends HTMLElement {
 		}
 	}
 
-	get selected() {
-		return this.#_selected
-	}
+	get selected() { return this.#_selected	}
 
-	get favoriteStar() {
-		return this.#_currentFavStar
-	}
+	get favoriteStar() { return this.#_currentFavStar	}
 
-	set zindex(val) {
-		this.setAttribute("zindex", val)
-	}
+	set zindex(val) { this.setAttribute("zindex", val) }
 
-	set locked(isLocked) {
-		this.#_isLocked = isLocked
-	}
+	set locked(isLocked) { this.#_isLocked = isLocked	}
+
+	set defaultSelections(val) { this.#_defaultSelections = val	}
 
 
 	static get observedAttributes() {
@@ -202,7 +194,7 @@ class Element extends HTMLElement {
 	// note: the purpose of using requestAnimationFrame() here is to make sure 
 	// that an element - which we want to access - actually exists.
 	// seems that .innerHTML takes a while "asynchroneously"...
-	// TODO: function is too big...
+	// TODO: function is too big... refactor by splitting it up
 	#fill(itemsMap, groupChanges) {
 		if(itemsMap) {
 			for (const [key, val] of itemsMap.entries()) {
@@ -247,16 +239,25 @@ class Element extends HTMLElement {
 					}
 				})
 
-				if(this.#_selected.size === 0) {	// initially (1st element)
-					if( this.#_hasFavoriteStar ) {
-						this.#_currentFavStar = key
-						this.#setFavorite(key)
+				
+				if(this.#_defaultSelections.length === 0) {
+					if(this.#_selected.size === 0) {	// initially (1st element)
+						this.#selectOne(key, val)
+						if( this.#_hasFavoriteStar ) { this.#setFavorite(key) }
 					}
-					this.#selectOne(key, val)
-					this.#invokeCallback(key, val)
+				} else {
+					if(this.#_defaultSelections.includes(key)) {
+						this.#selectOne(key, val)
+						if( this.#_hasFavoriteStar && this.#_currentFavStar==="" ) {
+							this.#setFavorite(key)
+						}
+					}
 				}
-
+				
 			}
+
+			this.#invokeCallback("", "")
+
 		} else {
 			throw Error("ecl-like-select-x: empty input")
 		}
@@ -303,9 +304,11 @@ class Element extends HTMLElement {
 	}
 
 	#setFavorite(key) {
-		const currentElId = ms.domElementIds.listItemPrefix + this.#stringHash(this.#_currentFavStar)
+		if(this.#_currentFavStar !== "") {
+			const currentElId = ms.domElementIds.listItemPrefix + this.#stringHash(this.#_currentFavStar)
+			this.#$(currentElId).querySelector("div [favstar]").textContent=""
+		}
 		const newElId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
-		this.#$(currentElId).querySelector("div [favstar]").textContent="-"
 		this.#$(newElId).querySelector("div [favstar]").textContent="*"
 		this.#_currentFavStar=key
 	}
@@ -324,7 +327,7 @@ class Element extends HTMLElement {
 		this.#$(ms.domElementIds.headBoxContent).innerHTML = html
 	}
 
-	#onListItemClick(key, val, invokeCallback=true) {
+	#onListItemClick(key, val) {
 		const that = this
 
 		if(this.#_isLocked) return
@@ -437,6 +440,20 @@ class Element extends HTMLElement {
 		})
 	}
 
+	selectDefaults() {
+		this.#deselectAll()
+		var items = this.#$(ms.domElementIds.list).getElementsByTagName("li");
+		if(this.#_defaultSelections.length===0) {
+			this.#selectOne(items[0].getAttribute("key"), items[0].getAttribute("val"))
+		} else {
+			for (var i = 0; i < items.length; ++i) {
+				if( this.#_defaultSelections.includes(items[i].getAttribute("key")) ) { 
+					this.#selectOne(items[i].getAttribute("key"), items[i].getAttribute("val"))
+				}
+			}
+		}
+		this.#invokeCallback("", "")
+	}
 
 }
 

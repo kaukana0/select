@@ -8,6 +8,8 @@
 - get selectedKeys
 - set locked
 - fractions (attribute)
+- set defaultSelections
+- selectDefaults()
 
 Note: Properties become attributes.
 
@@ -53,15 +55,15 @@ Notes:
     d.set("EU27_2020", 'European Union')
     d.set("GR", 'Greece')
     d.set("UG", 'Uganda')
-    d.set("CA", 'Canada')
+    d.set("CO", 'Cordovia')
 
     var groups = {"GR":{selectable:true,text:"Select all below"}}
 
     document.getElementById("selectCountry").data = [d, groups]
     // there will be a separation line after "Greece", with title "Select all below"
-    // it will have a checkbox - like a regular entry
+    // it will be clickable - like a regular (non group header) item
 
-Note: triggers invocation of callback.
+Note: triggers invocation of onSelected callback.
 
 ## getting selections
 
@@ -77,3 +79,12 @@ Note: triggers invocation of callback.
 ## locked
 
 prohibit user from selecting/deselecting items.
+
+## defaults
+
+    document.getElementById("selectCountry").defaultSelections = ["CO", "UG"]
+    document.getElementById("selectCountry").selectDefaults()
+
+now, everything is unselected except Cordovia and Uganda, they're selected.
+
+note: can be set before and after setting data. when setting before, selectDefaults() can be omitted, because the defaults are set while filling the box.
