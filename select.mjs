@@ -136,12 +136,13 @@ class Element extends HTMLElement {
 							isFirst = false
 							this.#deselectAll()
 						}
-						this.#selectOne(key,val)
+						this.#selectOne(key)
 					} else {
 						console.warn(`ecl-like-select-x: set selected - key "${key}" doesn't exist.`)
 					}
 				}
 			}
+			this.#invokeCallback("", "")
 		}
 	}
 
@@ -165,9 +166,16 @@ class Element extends HTMLElement {
 			console.warn("ecl-like-select-x: setting "+name+" via html attribute is being ignored. please use js property instead.")
 		}
 		if(name === 'multiselect') {
-			// switch multiselect on/off.
-			// warning: switch to off while multiple items are selected is untested.
 			this.connectedCallback()
+			if(this.#_selected.size > 0) {
+				this.#_isMultiselect = newVal === "true"
+				this.#deselectAll()
+				if(this.#_currentFavStar === "") {
+					this.#selectOne(this.#_selected.keys()[0])
+				} else {
+					this.#selectOne(this.#_currentFavStar)
+				}
+			}
 		}
 		if(name === 'style') {
 			if(newVal) {
@@ -234,6 +242,7 @@ class Element extends HTMLElement {
 						ev.stopPropagation()	// don't close dropdown list
 					}
 				})
+
 				window.requestAnimationFrame(() => this.#$(elId).onkeydown = (e) => {
 					if(e.keyCode==13) {
 						this.#onListItemClick(key, val)
@@ -243,12 +252,12 @@ class Element extends HTMLElement {
 				
 				if(this.#_defaultSelections.length === 0) {
 					if(this.#_selected.size === 0) {	// initially (1st element)
-						this.#selectOne(key, val)
+						this.#selectOne(key)
 						if( this.#_hasFavoriteStar ) { this.#setFavorite(key) }
 					}
 				} else {
 					if(this.#_defaultSelections.includes(key)) {
-						this.#selectOne(key, val)
+						this.#selectOne(key)
 						if( this.#_hasFavoriteStar && this.#_currentFavStar==="" ) {
 							this.#setFavorite(key)
 						}
@@ -273,10 +282,13 @@ class Element extends HTMLElement {
 		return null
 	}
 
-	#selectOne(key, val) {
+	#selectOne(key) {
 		const elId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
 		const el = this.#$(elId)
-		if( !el.hasAttribute("isCollectable") ) {	this.#_selected.clear() }		// max 1
+		const val = el.getAttribute("val")
+		if( !el.hasAttribute("isCollectable") || !this.#_isMultiselect ) {
+				this.#deselectAll()				// max 1
+		}
 		if(el) {
 			this.#_selected.set(key,val)
 			this.#setChecked(el, true)
@@ -314,14 +326,6 @@ class Element extends HTMLElement {
 		this.#_currentFavStar=key
 	}
 
-	#getClearButtonHtml() {
-		const uniquePrefix = Math.floor(Math.random() * 10000)
-		const id = uniquePrefix+"clearButton"
-		// can't use fontawesome or similar because shadow DOM...
-		const retVal = MarkUpCode.clearButton(id)
-		return [id, retVal]
-	}
-
 	#updateHeadBoxContent() {
 		const selectedCount = this.#_isMultiselect ? this.#_selected.size : null
 		const html = MarkUpCode.headBoxContent(Array.from(this.#_selected.values()).join(), selectedCount)
@@ -353,7 +357,7 @@ class Element extends HTMLElement {
 				}
 			} else {
 				if(that.#_onSelect && that.#_onSelect(key,val)===false) {return} 
-				that.#selectOne(key, val)
+				that.#selectOne(key)
 				alignOrderOfSelectedItems()
 				if(that.#$(elId).hasAttribute("isSelectable")) {
 					action()
@@ -375,7 +379,7 @@ class Element extends HTMLElement {
 			const elId = ms.domElementIds.listItemPrefix + key
 			const selectionChanged = key !== that.#_selected.keys().next().value
 			if(selectionChanged) {
-				that.#selectOne(key,val)
+				that.#selectOne(key)
 				action()
 			} else {
 				// nop
@@ -445,11 +449,11 @@ class Element extends HTMLElement {
 		this.#deselectAll()
 		var items = this.#$(ms.domElementIds.list).getElementsByTagName("li");
 		if(this.#_defaultSelections.length===0) {
-			this.#selectOne(items[0].getAttribute("key"), items[0].getAttribute("val"))
+			this.#selectOne(items[0].getAttribute("key"))
 		} else {
 			for (var i = 0; i < items.length; ++i) {
 				if( this.#_defaultSelections.includes(items[i].getAttribute("key")) ) { 
-					this.#selectOne(items[i].getAttribute("key"), items[i].getAttribute("val"))
+					this.#selectOne(items[i].getAttribute("key"))
 				}
 			}
 		}
