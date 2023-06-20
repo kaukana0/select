@@ -142,7 +142,6 @@ class Element extends HTMLElement {
 					}
 				}
 			}
-			this.#invokeCallback("", "")
 		}
 	}
 
@@ -287,7 +286,7 @@ class Element extends HTMLElement {
 		const el = this.#$(elId)
 		const val = el.getAttribute("val")
 		if( !el.hasAttribute("isCollectable") || !this.#_isMultiselect ) {
-				this.#deselectAll()				// max 1
+			this.#deselectAll()				// max 1
 		}
 		if(el) {
 			this.#_selected.set(key,val)
@@ -376,7 +375,6 @@ class Element extends HTMLElement {
 		}
 	
 		function handleSingleSelectClick() {
-			const elId = ms.domElementIds.listItemPrefix + key
 			const selectionChanged = key !== that.#_selected.keys().next().value
 			if(selectionChanged) {
 				that.#selectOne(key)
@@ -451,13 +449,12 @@ class Element extends HTMLElement {
 		if(this.#_defaultSelections.length===0) {
 			this.#selectOne(items[0].getAttribute("key"))
 		} else {
-			for (var i = 0; i < items.length; ++i) {
+			for (let i = 0; i < items.length; i++) {
 				if( this.#_defaultSelections.includes(items[i].getAttribute("key")) ) { 
 					this.#selectOne(items[i].getAttribute("key"))
 				}
 			}
 		}
-		this.#invokeCallback("", "")
 	}
 
 }
