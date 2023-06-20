@@ -57,7 +57,8 @@ Notes:
     d.set("UG", 'Uganda')
     d.set("CO", 'Cordovia')
 
-    var groups = {"GR":{selectable:true,text:"Select all below"}}
+    var groups = new Map()
+    groups.set("GR", {text:"Select all below", selectable:true})
 
     document.getElementById("selectCountry").data = [d, groups]
     // there will be a separation line after "Greece", with title "Select all below"

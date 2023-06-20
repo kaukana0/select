@@ -19,15 +19,21 @@ export default class MarkUpCode {
 		#${ms.domElementIds.headBox} {
 			position:relative;
 			display: flex;
-			border: 1px solid rgba(0,0,0,1);
 			cursor: pointer;
 			height: 2em;
 			align-items: center;
 			padding: 0.2em;
 			/*font-weight: bold;*/
 			font-size: 1.1rem;
+
+			margin-left: 1px;
+			margin-right: 1px;
+			border: 1px solid #515560;
+			background-color: #fff;
+			border-radius: 3px;
+		  box-shadow: inset 0 2px 4px rgba(9,49,142,.08),inset 0 0 10px rgba(9,49,142,.04),inset 0 4px 5px rgba(9,49,142,.04),inset 0 -4px 4px rgba(9,49,142,.04);
+
 		}
-		
 		
 		#${ms.domElementIds.headBoxContent} {
 			height: 1.8em;
@@ -49,12 +55,28 @@ export default class MarkUpCode {
 		
 		/* this is bootstrap's CSS triangle; only positionable here via margin */
 		#${ms.domElementIds.headBox}:after {
-			content: "";
-			border-top: 0.3em solid;
-			border-right: 0.3em solid transparent;
-			border-bottom: 0;
-			border-left: 0.3em solid transparent;
-			margin-right: 0.255em;
+			/* simpler, relatively similar to fontawesome*/
+			content:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-5 -5 37 37' width='100%' height='48px' stroke='white' fill='none' %3E%3Cpath d='M7 10L13 16L19 10' stroke-width='3.5' stroke-linecap='butt' stroke-linejoin='round'/%3E%3C/svg%3E");
+			
+		
+			/* same path as fontawesome
+			content:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-200 -100 700 700' width='100%' height='48px' stroke='white' fill='white' %3E%3Cpath d='M143 352.3L7 216.3c-9.4-9.4-9.4-24.6 0-33.9l22.6-22.6c9.4-9.4 24.6-9.4 33.9 0l96.4 96.4 96.4-96.4c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9l-136 136c-9.2 9.4-24.4 9.4-33.8 0z' stroke-linecap='butt' stroke-linejoin='round'/%3E%3C/svg%3E");
+			*/
+
+			/* same path as ECL
+			content:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-35 -38 42 42' width='100%' height='35px' stroke='white' fill='white' %3E%3Cpath d='M18.2 17.147c.2.2.4.3.7.3.3 0 .5-.1.7-.3.4-.4.4-1 0-1.4l-7.1-7.1c-.4-.4-1-.4-1.4 0l-7 7c-.3.4-.3 1 .1 1.4.4.4 1 .4 1.4 0l6.2-6.2 6.4 6.3z' stroke-linecap='butt' stroke-width='0.1' stroke-linejoin='round' transform='rotate(180)' /%3E%3C/svg%3E");
+			*/
+
+			text-align: center;
+			position: absolute;
+			width: 44px;
+			height: 43px;
+			background: #0E47CB;
+			right: 0px;
+			border: 0px;
+			border-top-right-radius: 3px;
+			border-bottom-right-radius: 3px;
+			pointer-events: none;
 		}
 		
 		#${ms.domElementIds.list} {
@@ -116,14 +138,15 @@ export default class MarkUpCode {
 			border-radius: 50%;
 			color: #fff;
 			display: inline-flex;
-			font: normal normal 400 1.2rem/0.6rem arial,sans-serif;
+			font: normal normal 400 0.8rem/0.2rem arial,sans-serif;
+			vertical-align: bottom;
 			height: auto;
 			justify-content: center;
 			padding: 0.75rem;
 			position: relative;
-			top: -3px;
-			text-align: center;
-			/*width: 32px;*/
+			height: 0px;
+			width: 0px;
+			margin-right: 5px;
 		}
 
 		.groupHeader {
@@ -136,7 +159,7 @@ export default class MarkUpCode {
 		.item {
 			color: #404040;
 			display: inline-flex;
-			font: normal normal 400 1rem/1.5rem arial,sans-serif;
+			font: normal normal 400 16px arial,sans-serif;
 			white-space: pre-wrap;
 		}
 		</style>`
