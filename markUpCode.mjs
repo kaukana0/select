@@ -138,7 +138,7 @@ export default class MarkUpCode {
 			border-radius: 50%;
 			color: #fff;
 			display: inline-flex;
-			font: normal normal 400 0.8rem/0.2rem arial,sans-serif;
+			font: normal normal 400 0.8rem/0.2rem Arial,sans-serif;
 			vertical-align: bottom;
 			height: auto;
 			justify-content: center;
@@ -151,16 +151,17 @@ export default class MarkUpCode {
 
 		.groupHeader {
 			color: #707070;
-			font: normal normal 400 1rem/1.5rem arial,sans-serif;
+			font: normal normal 400 1rem/1.5rem Arial,sans-serif;
 			font-weight: 700;
 			margin: 0.5rem 0;
 		}
 
 		.item {
-			color: #404040;
+			color: #000;
 			display: inline-flex;
-			font: normal normal 400 16px arial,sans-serif;
+			font: normal normal 400 16px Arial,sans-serif;
 			white-space: pre-wrap;
+			vertical-align: bottom;
 		}
 		</style>`
 	}
@@ -189,7 +190,10 @@ export default class MarkUpCode {
 		// know that it's checked and everything goes out of sync
 		return `
 			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable isCheckable isCollectable>
-				${MarkUpCode.grid(fractions, `<div class="item container"><input type='checkbox' class="my-checkbox" style="pointer-events: none;">${val}</div>${favStarHtml}`)}
+				${MarkUpCode.grid(fractions, `
+					<div class="item">
+						<input type='checkbox' style="pointer-events: none; width:20px; height:20px; accent-color: #0e47cb;">${val}</div>
+						${favStarHtml}`)}
 			</li>
 		`
 	}
@@ -203,7 +207,7 @@ export default class MarkUpCode {
 			const style = isSelectable ? "" : "pointer-events:none;"
 			return this.separator() + `
 				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' tabindex="0" ${is} style="${style}">
-					${MarkUpCode.grid(1, `<div class="groupHeader">${sel} ${text}</div>`)}
+					${MarkUpCode.grid(99, `<div class="groupHeader">${sel} ${text}</div>`)}
 				</li>
 			`
 		}

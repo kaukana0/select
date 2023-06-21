@@ -94,7 +94,7 @@ class Element extends HTMLElement {
 	connectedCallback() {
 		this.#_isMultiselect = this.hasAttribute('multiselect') ? true : false
 		this.#_hasFavoriteStar = this.hasAttribute('favoriteStar') ? true : false
-		this.#_fractions = this.hasAttribute('fractions') ? this.getAttribute('fractions') : 3
+		this.#_fractions = this.hasAttribute('fractions') ? this.getAttribute('fractions') : 99		// the higher, the more towards 1 column
 		if(!this.#_isInitialized) {
 			this.#registerEvents()	
 			this.#makeDismissable()
