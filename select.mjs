@@ -318,10 +318,10 @@ class Element extends HTMLElement {
 	#setFavorite(key) {
 		if(this.#_currentFavStar !== "") {
 			const currentElId = ms.domElementIds.listItemPrefix + this.#stringHash(this.#_currentFavStar)
-			this.#$(currentElId).querySelector("div [favstar]").textContent=""
+			this.#$(currentElId).querySelector("div [favstar]").innerHTML= MarkUpCode.button("star", "favstar")
 		}
 		const newElId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
-		this.#$(newElId).querySelector("div [favstar]").textContent="*"
+		this.#$(newElId).querySelector("div [favstar]").innerHTML = MarkUpCode.button("starFilled", "favstar")
 		this.#_currentFavStar=key
 	}
 

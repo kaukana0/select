@@ -44,15 +44,6 @@ export default class MarkUpCode {
 			text-align: left;
 		}
 		
-		#${ms.domElementIds.headBoxContent} button {
-			color:black; 
-			vertical-align: text-bottom;
-			/*background-color: #FFFFED;*/
-			border: 1px solid black;
-			border-radius:2px;
-			/*border-radius:14px;*/
-		}
-		
 		/* this is bootstrap's CSS triangle; only positionable here via margin */
 		#${ms.domElementIds.headBox}:after {
 			/* simpler, relatively similar to fontawesome*/
@@ -159,9 +150,15 @@ export default class MarkUpCode {
 		.item {
 			color: #000;
 			display: inline-flex;
+			flex-flow:row;
+
 			font: normal normal 400 16px Arial,sans-serif;
 			white-space: pre-wrap;
-			vertical-align: bottom;
+			vertical-align: baseline;
+
+			font-size:1.0rem;
+			line-height: 2.5rem;
+
 		}
 		</style>`
 	}
@@ -184,7 +181,9 @@ export default class MarkUpCode {
 	}
 
 	static multiSelectItem(ms, key, val, hasFavStar=false, fractions=1) {
-		const favStarHtml =  hasFavStar ? `<div tabindex="0" favStar>-</div>` : ""
+		const favStarHtml =  hasFavStar ? 
+		MarkUpCode.button("star", "favstar")
+		 : ""
 		// the pointer-events thing makes it ignore events - only from the js
 		// should it be set programatically, otherwise the ecl-like-select-x JS doesn't
 		// know that it's checked and everything goes out of sync
@@ -192,10 +191,16 @@ export default class MarkUpCode {
 			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable isCheckable isCollectable>
 				${MarkUpCode.grid(fractions, `
 					<div class="item">
-						<input type='checkbox' style="pointer-events: none; width:20px; height:20px; accent-color: #0e47cb;">${val}</div>
+						<input type='checkbox' style="transform: scale(1.7); pointer-events: none; accent-color: #0e47cb;">
+						<p style="margin:2px 10px;">${val}</p>
+					</div>
 						${favStarHtml}`)}
 			</li>
 		`
+	}
+
+	static button(symbol, attribs) {
+		return `<div tabindex="0" favstar><symbol-button id="${symbol}" symbol="${symbol}" ${attribs}></symbol-button></div>`
 	}
 
 	static groupHeader(ms=null, text="", isSelectable=false) {
