@@ -1,30 +1,11 @@
 /*
-- to be implemented:
-  ok - fav star
-  ok - blue circle
-  ok - comma separated list of selections
-  - ECL arrow
-	- ECL style CSS
-	- ECL style checkbox
-	- fav Star image
-	- test single-select mode
-  ok - selectionAllowed callback
-  ok - group check-all checkbox
-	ok - checkbox no haken
-	ok - single select highlight w/o haken
-	- let user specify what is select initially (now always the first one)
-- to be removed:
-	ok - mini images
-*/
-
-/*
 a list item's behaviour has 3 aspects:
 
 - isSelectable: call all callbacks
 - isCheckable: has a checkbox - multiselect only
 - isCollectable: #_selected.length can be >1 - multiselect only
 
-only some combinations (of the possible 2^3) are supported - i.e. make sense in this context:
+only some combinations (of the possible 2^3) are supported - i.e. make sense:
 
 - single select item: isSelectable
 - multiselect item: isSelectable + isCheckable + isCollectable
@@ -201,75 +182,88 @@ class Element extends HTMLElement {
 	// note: the purpose of using requestAnimationFrame() here is to make sure 
 	// that an element - which we want to access - actually exists.
 	// seems that .innerHTML takes a while "asynchroneously"...
-	// TODO: function is too big... refactor by splitting it up
 	#fill(itemsMap, groupChanges) {
-		if(itemsMap) {
-			for (const [key, val] of itemsMap.entries()) {
+		const that = this
 
-				// TODO: no line if 1st in list
-				if(groupChanges && groupChanges.has(key)) {
-					const text = typeof groupChanges.get(key).text === "undefined" ? "" : groupChanges.get(key).text
-					const selectable = typeof groupChanges.get(key).selectable === "undefined" ? false : groupChanges.get(key).selectable
-					this.#$(ms.domElementIds.list).innerHTML += MarkUpCode.groupHeader(ms, text, selectable)
-					if(selectable) {
-						const elId = ms.domElementIds.listItemPrefix + text
-						window.requestAnimationFrame(() => this.#$(elId).onclick = (ev) => {
-							this.#onListItemClick(text, text)
-							ev.stopPropagation()	// don't close dropdown list
-						})
-					}
-				}
+		if(itemsMap) {
+			let isFirstEntry = true
+			for (const [key, val] of itemsMap.entries()) {
+				insertGroupItem(groupChanges, key, isFirstEntry)
+				insertItem(key, val)
+				addEventListeners(key, val)
+				setInitiallySelected(key)
 
 				this.#_orderedItems.push(val)
-
-				if(this.#_isMultiselect) {
-					this.#$(ms.domElementIds.list).innerHTML += MarkUpCode.multiSelectItem(ms, this.#stringHash(key), val, this.#_hasFavoriteStar, this.#_fractions)
-				} else {
-					this.#$(ms.domElementIds.list).innerHTML += MarkUpCode.singleSelectItem(ms, this.#stringHash(key), val)
-				}
-
-				const elId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
-				window.requestAnimationFrame(() => this.#$(elId).onclick = (ev) => {
-
-					if( ev.target.hasAttribute("favstar") ) {
-						this.#setFavorite(key)
-					} 
-
-					this.#onListItemClick(key, val)
-
-					if(this.#_isMultiselect) {
-						ev.stopPropagation()	// don't close dropdown list
-					}
-				})
-
-				window.requestAnimationFrame(() => this.#$(elId).onkeydown = (e) => {
-					if(e.keyCode==13) {
-						this.#onListItemClick(key, val)
-					}
-				})
-
-				
-				if(this.#_defaultSelections.length === 0) {
-					if(this.#_selected.size === 0) {	// initially (1st element)
-						this.#selectOne(key)
-						if( this.#_hasFavoriteStar ) { this.#setFavorite(key) }
-					}
-				} else {
-					if(this.#_defaultSelections.includes(key)) {
-						this.#selectOne(key)
-						if( this.#_hasFavoriteStar && this.#_currentFavStar==="" ) {
-							this.#setFavorite(key)
-						}
-					}
-				}
-				
+				isFirstEntry = false
 			}
-
 			this.#invokeCallback("", "")
-
 		} else {
 			throw Error("ecl-like-select-x: empty input")
 		}
+
+
+		function insertGroupItem(groupChanges, key, isFirstEntry) {
+			// TODO: no line if 1st in list
+			if(groupChanges && groupChanges.has(key)) {
+				const text = typeof groupChanges.get(key).text === "undefined" ? "" : groupChanges.get(key).text
+				const selectable = typeof groupChanges.get(key).selectable === "undefined" ? false : groupChanges.get(key).selectable
+				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.groupHeader(ms, text, selectable, !isFirstEntry)
+				if(selectable) {
+					const elId = ms.domElementIds.listItemPrefix + text
+					window.requestAnimationFrame(() => that.#$(elId).onclick = (ev) => {
+						that.#onListItemClick(text, text)
+						ev.stopPropagation()	// don't close dropdown list
+					})
+				}
+			}
+		}
+
+		function insertItem(key, val) {
+			if(that.#_isMultiselect) {
+				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.multiSelectItem(ms, that.#stringHash(key), val, that.#_hasFavoriteStar, that.#_fractions)
+			} else {
+				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.singleSelectItem(ms, that.#stringHash(key), val)
+			}
+		}
+
+		function addEventListeners(key, val) {
+			const elId = ms.domElementIds.listItemPrefix + that.#stringHash(key)
+			window.requestAnimationFrame(() => that.#$(elId).onclick = (ev) => {
+
+				if( ev.target.hasAttribute("favstar") ) {
+					that.#setFavorite(key)
+				} 
+
+				that.#onListItemClick(key, val)
+
+				if(that.#_isMultiselect) {
+					ev.stopPropagation()	// don't close dropdown list
+				}
+			})
+
+			window.requestAnimationFrame(() => that.#$(elId).onkeydown = (e) => {
+				if(e.keyCode==13) {
+					that.#onListItemClick(key, val)
+				}
+			})
+		}
+
+		function setInitiallySelected(key) {
+			if(that.#_defaultSelections.length === 0) {
+				if(that.#_selected.size === 0) {	// initially (1st element)
+					that.#selectOne(key)
+					if( that.#_hasFavoriteStar ) { that.#setFavorite(key) }
+				}
+			} else {
+				if(that.#_defaultSelections.includes(key)) {
+					that.#selectOne(key)
+					if( that.#_hasFavoriteStar && that.#_currentFavStar==="" ) {
+						that.#setFavorite(key)
+					}
+				}
+			}
+		}
+
 	}
 
 	// you wanna search everything, go thorugh the DOM as there's no other list in here which is exhaustive

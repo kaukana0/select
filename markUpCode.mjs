@@ -203,19 +203,20 @@ export default class MarkUpCode {
 		return `<div tabindex="0" favstar><symbol-button id="${symbol}" symbol="${symbol}" ${attribs}></symbol-button></div>`
 	}
 
-	static groupHeader(ms=null, text="", isSelectable=false) {
+	static groupHeader(ms=null, text="", isSelectable=false, hasSeparator=true) {
 		if(text==="") {
-			return this.separator()
+			if(hasSeparator) { return this.separator() }
 		} else {
 			const sel = isSelectable ? "<img src='components/select/img/selectall.png' style='height:1rem;'>" : ""
 			const is = isSelectable? "isSelectable" : ""
 			const style = isSelectable ? "" : "pointer-events:none;"
-			return this.separator() + `
+			return (hasSeparator ? this.separator() : "") + `
 				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' tabindex="0" ${is} style="${style}">
 					${MarkUpCode.grid(99, `<div class="groupHeader">${sel} ${text}</div>`)}
 				</li>
 			`
 		}
+		return ""
 	}
 
 	static headBoxContent(text, numba) {
