@@ -341,6 +341,7 @@ class Element extends HTMLElement {
 			const elId = ms.domElementIds.listItemPrefix + that.#stringHash(key)
 			if(that.#_selected.has(key)) {
 				if(that.#_selected.size > 1) {
+					if(that.#_onSelect && that.#_onSelect(key,val)===false) {return} 
 					that.#_selected.delete(key)
 					//that.#$(elId).firstElementChild.firstElementChild.firstElementChild.removeAttribute("checked")
 					that.#setChecked(that.#$(elId), false)
