@@ -149,11 +149,13 @@ class Element extends HTMLElement {
 			this.connectedCallback()
 			if(this.#_selected.size > 0) {
 				this.#_isMultiselect = newVal === "true"
-				this.#deselectAll()
-				if(this.#_currentFavStar === "") {
-					this.#selectOne(this.#_selected.keys()[0])
-				} else {
-					this.#selectOne(this.#_currentFavStar)
+				if(!this.#_isMultiselect) {	// when being switched off, select 1
+					this.#deselectAll()
+					if(this.#_currentFavStar === "") {
+						this.#selectOne(this.#_selected.keys()[0])
+					} else {
+						this.#selectOne(this.#_currentFavStar)
+					}
 				}
 			}
 		}
@@ -423,7 +425,7 @@ class Element extends HTMLElement {
 			// without this, it would stay down, with this, it's scrolled topmost
 		}
 
-		//ev.stopPropagation()
+		//if(ev) { ev.stopPropagation() }
 	
 		// note: clicks anywhere else other than this component are handled under dismissability
 	}
