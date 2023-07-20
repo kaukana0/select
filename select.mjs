@@ -41,6 +41,7 @@ class Element extends HTMLElement {
 	#_orderedItems	// for instance ["European Union","Austria",...]
 	#_defaultSelections		// [] of keys
 	#_isInitialized
+	#_textForMultiselect	// what should be displayed if multiple are selected. eg "items selected"
 
 	#$(elementId) {
 		return this.shadowRoot.getElementById(elementId)
@@ -130,15 +131,18 @@ class Element extends HTMLElement {
 
 	get favoriteStar() { return this.#_currentFavStar	}
 
-	set zindex(val) { this.setAttribute("zindex", val) }
-
 	set locked(isLocked) { this.#_isLocked = isLocked	}
 
 	set defaultSelections(val) { this.#_defaultSelections = val	}
 
+	set textForMultiselect(val) {
+		this.#_textForMultiselect = val
+		this.#updateHeadBoxContent()
+	}
+
 
 	static get observedAttributes() {
-		return ['data', 'onSelect', 'onSelected', 'style', 'multiselect', 'zindex']
+		return ['data', 'onSelect', 'onSelected', 'style', 'multiselect', 'textformultiselect']
 	}
 
 	attributeChangedCallback(name, oldVal, newVal) {
@@ -164,6 +168,9 @@ class Element extends HTMLElement {
 				// relay anyting to this element's main container
 				this.#$(ms.domElementIds.headBox).style.cssText = this.#$(ms.domElementIds.headBox).style.cssText+newVal
 			}
+		}
+		if(name === 'textformultiselect') {
+			this.textForMultiselect = newVal
 		}
 	}
 
@@ -323,7 +330,8 @@ class Element extends HTMLElement {
 
 	#updateHeadBoxContent() {
 		const selectedCount = this.#_isMultiselect ? this.#_selected.size : null
-		const html = MarkUpCode.headBoxContent(Array.from(this.#_selected.values()).join(), selectedCount)
+		const text = (this.#_textForMultiselect && this.#_isMultiselect && this.selected.size>1) ? this.#_textForMultiselect : Array.from(this.#_selected.values()).join()
+		const html = MarkUpCode.headBoxContent(text, selectedCount)
 		this.#$(ms.domElementIds.headBoxContent).innerHTML = html
 	}
 

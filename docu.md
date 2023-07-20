@@ -61,8 +61,8 @@ Notes:
     groups.set("GR", {text:"Select all below", selectable:true})
 
     document.getElementById("selectCountry").data = [d, groups]
-    // there will be a separation line after "Greece", with title "Select all below"
-    // it will be clickable - like a regular (non group header) item
+    // there will be a separation line before "Greece", with title "Select all below"
+    // it will be clickable - like a regular (non group header) item (because selectable:true)
 
 Note: triggers invocation of onSelected callback.
 

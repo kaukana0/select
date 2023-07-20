@@ -231,10 +231,6 @@ export default class MarkUpCode {
 		return path ? `<img src='${path}/${key}.png' style="height:1.4rem; vertical-align: text-bottom;"></img>` : ""	
 	}
 
-	static clearButton(id) {
-		return `<button id="${id}" type='button'>Reset</button>`
-	}
-
 	static separator() { return "<hr>" }
 
 	static circledNumber(number) {
