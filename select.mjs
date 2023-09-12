@@ -180,7 +180,6 @@ class Element extends HTMLElement {
 		if(typeof obj === "object" && obj!==null) {
 			retVal=""
 			const str = JSON.stringify(obj)
-			let i=1
 			for(let ci in str) {
 				retVal += str.charCodeAt(ci)
 			}
@@ -217,7 +216,7 @@ class Element extends HTMLElement {
 			if(groupChanges && groupChanges.has(key)) {
 				const text = typeof groupChanges.get(key).text === "undefined" ? "" : groupChanges.get(key).text
 				const selectable = typeof groupChanges.get(key).selectable === "undefined" ? false : groupChanges.get(key).selectable
-				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.groupHeader(ms, text, selectable, false) // !isFirstEntry
+				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.groupHeader(ms, text, selectable, false)
 				if(selectable) {
 					const elId = ms.domElementIds.listItemPrefix + text
 					window.requestAnimationFrame(() => that.#$(elId).onclick = (ev) => {
@@ -291,11 +290,13 @@ class Element extends HTMLElement {
 		const elId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
 		const el = this.#$(elId)
 		const val = el.getAttribute("val")
-		if( !el.hasAttribute("isCollectable") || !this.#_isMultiselect ) {
+		if( !this.#_isMultiselect ) {
 			this.#deselectAll()				// max 1
 		}
 		if(el) {
-			this.#_selected.set(key,val)
+			if(el.hasAttribute("isCollectable") || !this.#_isMultiselect) {
+				this.#_selected.set(key,val)
+			}
 			this.#setChecked(el, true)
 			this.#updateHeadBoxContent()
 		} else {

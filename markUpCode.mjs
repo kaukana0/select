@@ -209,8 +209,8 @@ export default class MarkUpCode {
 		if(text==="") {
 			if(hasSeparator) { return this.separator() }
 		} else {
-			const sel = isSelectable ? this.checkbox(true) : ""
-			const is = isSelectable? "isSelectable" : ""
+			const sel = isSelectable ? this.checkbox() : ""
+			const is = isSelectable? "isSelectable isCheckable" : ""
 			const style = isSelectable ? "" : "pointer-events:none;"
 			return (hasSeparator ? this.separator() : "") + `
 				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' tabindex="0" ${is} style="${style}">
