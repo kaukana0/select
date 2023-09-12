@@ -196,9 +196,11 @@ class Element extends HTMLElement {
 
 		if(itemsMap) {
 			let isFirstEntry = true
+			let hasText = false
 			for (const [key, val] of itemsMap.entries()) {
-				insertGroupItem(groupChanges, key, isFirstEntry)
-				insertItem(key, val)
+				const bla2 = insertGroupItem(groupChanges, key, isFirstEntry)
+				if(bla2[0]) {hasText=bla2[1]}
+				insertItem(key, val, hasText)
 				addEventListeners(key, val)
 				setInitiallySelected(key)
 
@@ -210,13 +212,12 @@ class Element extends HTMLElement {
 			throw Error("ecl-like-select-x: empty input")
 		}
 
-
+		// returns [a,b], a=true if group exists and b=true if group has a text
 		function insertGroupItem(groupChanges, key, isFirstEntry) {
-			// TODO: no line if 1st in list
 			if(groupChanges && groupChanges.has(key)) {
 				const text = typeof groupChanges.get(key).text === "undefined" ? "" : groupChanges.get(key).text
 				const selectable = typeof groupChanges.get(key).selectable === "undefined" ? false : groupChanges.get(key).selectable
-				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.groupHeader(ms, text, selectable, !isFirstEntry)
+				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.groupHeader(ms, text, selectable, false) // !isFirstEntry
 				if(selectable) {
 					const elId = ms.domElementIds.listItemPrefix + text
 					window.requestAnimationFrame(() => that.#$(elId).onclick = (ev) => {
@@ -224,12 +225,14 @@ class Element extends HTMLElement {
 						ev.stopPropagation()	// don't close dropdown list
 					})
 				}
+				return [true, text!==""]
 			}
+			return [false, false]
 		}
 
-		function insertItem(key, val) {
+		function insertItem(key, val, indent) {
 			if(that.#_isMultiselect) {
-				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.multiSelectItem(ms, that.#stringHash(key), val, that.#_hasFavoriteStar, that.#_fractions)
+				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.multiSelectItem(ms, that.#stringHash(key), val, that.#_hasFavoriteStar, that.#_fractions, indent)
 			} else {
 				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.singleSelectItem(ms, that.#stringHash(key), val)
 			}

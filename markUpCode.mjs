@@ -139,11 +139,11 @@ export default class MarkUpCode {
 			margin-right: 5px;
 		}
 
+		ul {}
+
 		.groupHeader {
-			color: #707070;
-			font: normal normal 400 1rem/1.5rem Arial,sans-serif;
+			display: inline-flex;
 			font-weight: 700;
-			margin: 0.5rem 0;
 		}
 
 		.item {
@@ -157,7 +157,10 @@ export default class MarkUpCode {
 
 			font-size:1.0rem;
 			line-height: 2.5rem;
+		}
 
+		.indented {
+			margin-left: 1.5rem;
 		}
 		</style>`
 	}
@@ -179,7 +182,7 @@ export default class MarkUpCode {
 		`
 	}
 
-	static multiSelectItem(ms, key, val, hasFavStar=false, fractions=1) {
+	static multiSelectItem(ms, key, val, hasFavStar=false, fractions=1, indented=false) {
 		const favStarHtml =  hasFavStar ? 
 		MarkUpCode.button("star", "favstar")
 		 : ""
@@ -189,8 +192,8 @@ export default class MarkUpCode {
 		return `
 			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable isCheckable isCollectable>
 				${MarkUpCode.grid(fractions, `
-					<div class="item">
-						<input type='checkbox' style="transform: scale(1.7); pointer-events: none; accent-color: #0e47cb;">
+					<div class="item ${indented?"indented":""}">
+						${this.checkbox()}
 						<p style="margin:2px 10px;">${val}</p>
 					</div>
 						${favStarHtml}`)}
@@ -206,16 +209,20 @@ export default class MarkUpCode {
 		if(text==="") {
 			if(hasSeparator) { return this.separator() }
 		} else {
-			const sel = isSelectable ? "<img src='components/select/img/selectall.png' style='height:1rem;'>" : ""
+			const sel = isSelectable ? this.checkbox(true) : ""
 			const is = isSelectable? "isSelectable" : ""
 			const style = isSelectable ? "" : "pointer-events:none;"
 			return (hasSeparator ? this.separator() : "") + `
 				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' tabindex="0" ${is} style="${style}">
-					${MarkUpCode.grid(99, `<div class="groupHeader">${sel} ${text}</div>`)}
+					${MarkUpCode.grid(99, `<div class="groupHeader">${sel} <p style="margin:2px 10px;">${text}</p></div>`)}
 				</li>
 			`
 		}
 		return ""
+	}
+
+	static checkbox(checked=false) {
+		return `<input type='checkbox' ${checked?"checked=true":""} style="transform: scale(1.7); pointer-events: none; accent-color: #0e47cb;"></input>`
 	}
 
 	static headBoxContent(text, numba) {
