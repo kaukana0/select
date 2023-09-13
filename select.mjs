@@ -5,14 +5,16 @@ a list item's behaviour has 3 aspects:
 - isCheckable: has a checkbox - multiselect only
 - isCollectable: #_selected.length can be >1 - multiselect only
 
+These aspects are encoded as attributes of the <li> items
+and are used throughout the code to make decisions.
+
 only some combinations (of the possible 2^3) are supported - i.e. make sense:
 
 - single select item: isSelectable
 - multiselect item: isSelectable + isCheckable + isCollectable
 - group header w/o text: it's just a seperation line, so none of the three.
-- group header w/ text: can be isSelectable or not
+- group header w/ text: can be isSelectable + isCheckable or not
 
-these aspects are encoded as attributes of the <li> items.
 */
 
 import MarkUpCode from  "./markUpCode.mjs"		// keep this file html/css free
@@ -190,18 +192,18 @@ class Element extends HTMLElement {
 	// note: the purpose of using requestAnimationFrame() here is to make sure 
 	// that an element - which we want to access - actually exists.
 	// seems that .innerHTML takes a while "asynchroneously"...
-	#fill(itemsMap, groupChanges) {
+	#fill(itemsMap, groups) {
 		const that = this
 
 		if(itemsMap) {
 			let isFirstEntry = true
-			let hasText = false
+			let hasText = false		// span multiple possible group-entries in case header has text
 			for (const [key, val] of itemsMap.entries()) {
-				const bla2 = insertGroupItem(groupChanges, key, isFirstEntry)
-				if(bla2[0]) {hasText=bla2[1]}
+				const groupText = insertGroupItem(groups, key, isFirstEntry)
+				if(groupText[0]) {hasText=groupText[1]!==""}
 				insertItem(key, val, hasText)
 				addEventListeners(key, val)
-				setInitiallySelected(key)
+				setInitiallySelected(key, groupText[1])
 
 				this.#_orderedItems.push(val)
 				isFirstEntry = false
@@ -211,12 +213,12 @@ class Element extends HTMLElement {
 			throw Error("ecl-like-select-x: empty input")
 		}
 
-		// returns [a,b], a=true if group exists and b=true if group has a text
-		function insertGroupItem(groupChanges, key, isFirstEntry) {
-			if(groupChanges && groupChanges.has(key)) {
-				const text = typeof groupChanges.get(key).text === "undefined" ? "" : groupChanges.get(key).text
-				const selectable = typeof groupChanges.get(key).selectable === "undefined" ? false : groupChanges.get(key).selectable
-				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.groupHeader(ms, text, selectable, false)
+		// returns [a,b], a=true if group exists and b=text of group
+		function insertGroupItem(groups, key, isFirstEntry) {
+			if(groups && groups.has(key)) {
+				const text = typeof groups.get(key).text === "undefined" ? "" : groups.get(key).text
+				const selectable = typeof groups.get(key).selectable === "undefined" ? false : groups.get(key).selectable
+				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.groupHeader(ms, text, selectable, !isFirstEntry && text==="")
 				if(selectable) {
 					const elId = ms.domElementIds.listItemPrefix + text
 					window.requestAnimationFrame(() => that.#$(elId).onclick = (ev) => {
@@ -224,9 +226,9 @@ class Element extends HTMLElement {
 						ev.stopPropagation()	// don't close dropdown list
 					})
 				}
-				return [true, text!==""]
+				return [true, text]
 			}
-			return [false, false]
+			return [false, ""]
 		}
 
 		function insertItem(key, val, indent) {
@@ -259,7 +261,7 @@ class Element extends HTMLElement {
 			})
 		}
 
-		function setInitiallySelected(key) {
+		function setInitiallySelected(key, text) {
 			if(that.#_defaultSelections.length === 0) {
 				if(that.#_selected.size === 0) {	// initially (1st element)
 					that.#selectOne(key)
@@ -271,6 +273,9 @@ class Element extends HTMLElement {
 					if( that.#_hasFavoriteStar && that.#_currentFavStar==="" ) {
 						that.#setFavorite(key)
 					}
+				}
+				if(that.#_defaultSelections.includes(text)) {	// for header items key===value; called "text" here
+					that.#selectOne(text)
 				}
 			}
 		}
@@ -290,9 +295,7 @@ class Element extends HTMLElement {
 		const elId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
 		const el = this.#$(elId)
 		const val = el.getAttribute("val")
-		if( !this.#_isMultiselect ) {
-			this.#deselectAll()				// max 1
-		}
+		if(!this.#_isMultiselect) {	this.#deselectAll()	}		// max 1
 		if(el) {
 			if(el.hasAttribute("isCollectable") || !this.#_isMultiselect) {
 				this.#_selected.set(key,val)
