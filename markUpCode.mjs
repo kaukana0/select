@@ -149,13 +149,12 @@ export default class MarkUpCode {
 		.item {
 			color: #000;
 			display: inline-flex;
-			flex-flow:row;
+			flex-flow: row;
 
-			font: normal normal 400 16px Arial,sans-serif;
+			font: normal normal 400 1.0rem Arial,sans-serif;
 			white-space: pre-wrap;
 			vertical-align: baseline;
 
-			font-size:1.0rem;
 			line-height: 2.5rem;
 		}
 
@@ -221,8 +220,9 @@ export default class MarkUpCode {
 		return ""
 	}
 
+	// note: transform makes a y-scrollbar appear. it goes away w/ specifying some height.
 	static checkbox(checked=false) {
-		return `<input type='checkbox' ${checked?"checked=true":""} style="transform: scale(1.7); pointer-events: none; accent-color: #0e47cb;"></input>`
+		return `<input type='checkbox' ${checked?"checked=true":""} style="height:1.8rem; transform: scale(1.7); pointer-events: none; accent-color: #0e47cb;"></input>`
 	}
 
 	static headBoxContent(text, numba) {
