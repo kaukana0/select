@@ -30,6 +30,10 @@ const ms = {
 	},
 }
 
+
+// note: the purpose of using requestAnimationFrame() here is to make sure 
+// that an element - which we want to access immediately - actually exists.
+// seems that .innerHTML takes a while "asynchroneously"...
 class Element extends HTMLElement {
 
 	#_isMultiselect	// bool; from an attribute
@@ -44,6 +48,7 @@ class Element extends HTMLElement {
 	#_defaultSelections		// [] of keys
 	#_isInitialized
 	#_textForMultiselect	// what should be displayed if multiple are selected. eg "items selected"
+	#_disabledSelections	// [] of keys
 
 	#$(elementId) {
 		return this.shadowRoot.getElementById(elementId)
@@ -57,6 +62,7 @@ class Element extends HTMLElement {
 		this.#_orderedItems = []
 		this.#_currentFavStar = ""
 		this.#_defaultSelections = []
+		this.#_disabledSelections = []
 
 		this.attachShadow({ mode: 'open' })
 		const tmp = MarkUpCode.getHtmlTemplate(MarkUpCode.mainElements(ms) + MarkUpCode.css(ms, 5)).cloneNode(true)
@@ -142,6 +148,8 @@ class Element extends HTMLElement {
 		this.#updateHeadBoxContent()
 	}
 
+	set disabledSelections(val) { this.#_disabledSelections = val }
+
 
 	static get observedAttributes() {
 		return ['data', 'onSelect', 'onSelected', 'style', 'multiselect', 'textformultiselect']
@@ -189,20 +197,20 @@ class Element extends HTMLElement {
 		return retVal
 	}
 
-	// note: the purpose of using requestAnimationFrame() here is to make sure 
-	// that an element - which we want to access - actually exists.
-	// seems that .innerHTML takes a while "asynchroneously"...
 	#fill(itemsMap, groups) {
 		const that = this
 
 		if(itemsMap) {
 			let isFirstEntry = true
-			let hasText = false		// span multiple possible group-entries in case header has text
+			let hasText = false		// span multiple possible group-entries in case header has text.
 			for (const [key, val] of itemsMap.entries()) {
-				const groupText = insertGroupItem(groups, key, isFirstEntry)
+				const enabled = !this.#_disabledSelections.includes(key)
+				const groupText = insertGroupItem(groups, key, isFirstEntry, enabled)
 				if(groupText[0]) {hasText=groupText[1]!==""}
-				insertItem(key, val, hasText)
-				addEventListeners(key, val)
+				insertItem(key, val, hasText, enabled)
+				if(enabled) {
+					addEventListeners(key, val)
+				}
 				setInitiallySelected(key, groupText[1])
 
 				this.#_orderedItems.push(val)
@@ -214,12 +222,12 @@ class Element extends HTMLElement {
 		}
 
 		// returns [a,b], a=true if group exists and b=text of group
-		function insertGroupItem(groups, key, isFirstEntry) {
+		function insertGroupItem(groups, key, isFirstEntry, enabled) {
 			if(groups && groups.has(key)) {
 				const text = typeof groups.get(key).text === "undefined" ? "" : groups.get(key).text
 				const selectable = typeof groups.get(key).selectable === "undefined" ? false : groups.get(key).selectable
-				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.groupHeader(ms, text, selectable, !isFirstEntry && text==="")
-				if(selectable) {
+				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.groupHeader(ms, text, selectable, !isFirstEntry && text==="", enabled)
+				if(selectable && enabled) {
 					const elId = ms.domElementIds.listItemPrefix + text
 					window.requestAnimationFrame(() => that.#$(elId).onclick = (ev) => {
 						that.#onListItemClick(text, text)
@@ -231,11 +239,11 @@ class Element extends HTMLElement {
 			return [false, ""]
 		}
 
-		function insertItem(key, val, indent) {
+		function insertItem(key, val, indent, enabled) {
 			if(that.#_isMultiselect) {
-				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.multiSelectItem(ms, that.#stringHash(key), val, that.#_hasFavoriteStar, that.#_fractions, indent)
+				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.multiSelectItem(ms, that.#stringHash(key), val, that.#_hasFavoriteStar, that.#_fractions, indent, enabled)
 			} else {
-				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.singleSelectItem(ms, that.#stringHash(key), val)
+				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.singleSelectItem(ms, that.#stringHash(key), val, enabled)
 			}
 		}
 
@@ -343,25 +351,36 @@ class Element extends HTMLElement {
 	}
 
 	#onListItemClick(key, val) {
-		const that = this
-
 		if(this.#_isLocked) return
-		
-		if(that.#_isMultiselect) {
-			handleMultiSelectClick()
+		const that = this
+		const elId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
+		const el = this.#$(elId)
+
+		if(this.#_isMultiselect) {
+			if(el.hasAttribute("isGroupStart")) {
+				this.#deselectAll()
+				this.#selectOne(key)
+				let next = el.nextElementSibling
+				while(next && !next.hasAttribute("isGroupStart")) {
+					if( !this.#_disabledSelections.includes(next.getAttribute("key")) ) {
+						this.#selectOne(next.getAttribute("key"))
+					}
+					next = next.nextElementSibling
+				}
+				action()
+			} else {
+				handleMultiSelectClick(el)
+			}
 		} else {
 			handleSingleSelectClick()
 		}
 
-		function handleMultiSelectClick() {
-			
-			const elId = ms.domElementIds.listItemPrefix + that.#stringHash(key)
+		function handleMultiSelectClick(el) {
 			if(that.#_selected.has(key)) {
 				if(that.#_selected.size > 1) {
 					if(that.#_onSelect && that.#_onSelect(key,val)===false) {return} 
 					that.#_selected.delete(key)
-					//that.#$(elId).firstElementChild.firstElementChild.firstElementChild.removeAttribute("checked")
-					that.#setChecked(that.#$(elId), false)
+					that.#setChecked(el, false)
 					action()
 				} else {
 					// nop (at least 1 has to be selected at all times)
@@ -370,7 +389,7 @@ class Element extends HTMLElement {
 				if(that.#_onSelect && that.#_onSelect(key,val)===false) {return} 
 				that.#selectOne(key)
 				alignOrderOfSelectedItems()
-				if(that.#$(elId).hasAttribute("isSelectable")) {
+				if(el.hasAttribute("isSelectable")) {
 					action()
 				}
 			}

@@ -161,6 +161,10 @@ export default class MarkUpCode {
 		.indented {
 			margin-left: 1.5rem;
 		}
+
+		.disabled {
+			color: grey;
+		}
 		</style>`
 	}
 
@@ -173,7 +177,7 @@ export default class MarkUpCode {
 		`
 	}
 
-	static singleSelectItem(ms, key, val) {
+	static singleSelectItem(ms, key, val, enabled=true) {
 		return `
 			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable>
 				${MarkUpCode.grid(1, `<div>${val}</div>`)}
@@ -181,7 +185,7 @@ export default class MarkUpCode {
 		`
 	}
 
-	static multiSelectItem(ms, key, val, hasFavStar=false, fractions=1, indented=false) {
+	static multiSelectItem(ms, key, val, hasFavStar=false, fractions=1, indented=false, enabled=true) {
 		const favStarHtml =  hasFavStar ? 
 		MarkUpCode.button("star", "favstar")
 		 : ""
@@ -191,7 +195,7 @@ export default class MarkUpCode {
 		return `
 			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable isCheckable isCollectable>
 				${MarkUpCode.grid(fractions, `
-					<div class="item ${indented?"indented":""}">
+					<div class="item ${indented?"indented":""}  ${enabled?"":"disabled"}   ">
 						${this.checkbox()}
 						<p style="margin:2px 10px;">${val}</p>
 					</div>
@@ -204,15 +208,17 @@ export default class MarkUpCode {
 		return `<div tabindex="0" favstar><symbol-button id="${symbol}" symbol="${symbol}" ${attribs}></symbol-button></div>`
 	}
 
-	static groupHeader(ms=null, text="", isSelectable=false, hasSeparator=true) {
+	static groupHeader(ms=null, text="", isSelectable=false, hasSeparator=true, enabled=false) {
 		if(text==="") {
 			if(hasSeparator) { return this.separator() }
 		} else {
 			const sel = isSelectable ? this.checkbox() : ""
 			const is = isSelectable? "isSelectable isCheckable" : ""
-			const style = isSelectable ? "" : "pointer-events:none;"
+			const styleSel = isSelectable ? "" : "pointer-events:none;"
+			const styleDisabled = enabled ? "" : "color:grey;"
+
 			return (hasSeparator ? this.separator() : "") + `
-				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' tabindex="0" ${is} style="${style}">
+				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' tabindex='0' ${is} style='${styleSel} ${styleDisabled}' isGroupStart='true'>
 					${MarkUpCode.grid(99, `<div class="groupHeader">${sel} <p style="margin:2px 10px;">${text}</p></div>`)}
 				</li>
 			`

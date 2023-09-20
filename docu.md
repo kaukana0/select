@@ -10,6 +10,7 @@
 - fractions (attribute)
 - set defaultSelections
 - selectDefaults()
+- set disabledSelections
 
 Note: Properties become attributes.
 
@@ -61,7 +62,7 @@ Notes:
     groups.set("GR", {text:"Select all below", selectable:true})
 
     document.getElementById("selectCountry").data = [d, groups]
-    // there will be a separation line before "Greece", with title "Select all below"
+    // there will be a group separation before "Greece", with title "Select all below"
     // it will be clickable - like a regular (non group header) item (because selectable:true)
 
 Note: triggers invocation of onSelected callback.
@@ -89,3 +90,9 @@ prohibit user from selecting/deselecting items.
 now, everything is unselected except Cordovia and Uganda, they're selected.
 
 note: can be set before and after setting data. when setting before, selectDefaults() can be omitted, because the defaults are set while filling the box.
+
+## disabled
+
+    document.getElementById("selectCountry").disabledSelections = ["GB"]
+
+note: has only effect if set before setting data.
