@@ -164,7 +164,6 @@ export default class MarkUpCode {
 
 		.disabled {
 			color: grey;
-			text-decoration: line-through;
 		}
 		</style>`
 	}
@@ -216,7 +215,7 @@ export default class MarkUpCode {
 			const sel = isSelectable ? this.checkbox() : ""
 			const is = isSelectable? "isSelectable isCheckable" : ""
 			const styleSel = isSelectable ? "" : "pointer-events:none;"
-			const styleDisabled = enabled ? "" : "color:grey; text-decoration: line-through;"
+			const styleDisabled = enabled ? "" : "color:grey;"
 
 			return (hasSeparator ? this.separator() : "") + `
 				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' tabindex='0' ${is} style='${styleSel} ${styleDisabled}' isGroupStart='true'>
