@@ -143,7 +143,7 @@ export default class MarkUpCode {
 
 		.groupHeader {
 			display: inline-flex;
-			font-weight: 700;
+			font-weight: 700 !important;
 		}
 
 		.item {
