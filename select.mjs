@@ -82,17 +82,18 @@ class Element extends HTMLElement {
 	}
 
 	connectedCallback() {
-		this.#_isMultiselect = this.hasAttribute('multiselect') ? true : false
-		this.#_hasFavoriteStar = this.hasAttribute('favoriteStar') ? true : false
+		this.#_isMultiselect = this.hasAttribute('multiselect') ? this.getAttribute('multiselect')==="true" : false
+		this.#_hasFavoriteStar = this.hasAttribute('favoriteStar') ? this.getAttribute('favoriteStar')==="true" : false
 		this.#_fractions = this.hasAttribute('fractions') ? this.getAttribute('fractions') : 99		// the higher, the more towards 1 column
 		if(!this.#_isInitialized) {
+
 			this.#registerEvents()	
 			this.#makeDismissable()
 			this.#_isInitialized = true
 		}
 	}
 
-	disconnectedCallback() { console.debug("ecl-like-select-x: disconnected")	}
+	disconnectedCallback() { console.debug("ecl-like-select-x: disconnected", this.getAttribute("id"))	}
 
 	set data(val) {	this.#fill(val[0], val[1]) }
 
@@ -112,7 +113,6 @@ class Element extends HTMLElement {
 	// keys = []
 	// does not invoke onSelect or onSelected
 	set selected(keys) {
-		//console.log(keys)	//TODO: why is this undefined? (context: test insertAndHookUpBoxes)
 		if(typeof keys !== "undefined" && keys!==null) {
 			if(keys.length===0) {
 				this.#deselectAll()
@@ -166,16 +166,22 @@ class Element extends HTMLElement {
 				if(!this.#_isMultiselect) {	// when being switched off, select 1
 					this.#deselectAll()
 					if(this.#_currentFavStar === "") {
-						this.#selectOne(this.#_selected.keys()[0])
+						if(this.#_selected.size>0) {
+							this.#selectOne(this.#_selected.keys()[0])
+						} else {
+							console.error("select: no currentFavStar, no currently selected")
+						}
 					} else {
 						this.#selectOne(this.#_currentFavStar)
 					}
+				} else {
+					this.#updateHeadBoxContent()	
 				}
 			}
 		}
 		if(name === 'style') {
 			if(newVal) {
-				// relay anyting to this element's main container
+				// relay anything to this element's main container
 				this.#$(ms.domElementIds.headBox).style.cssText = this.#$(ms.domElementIds.headBox).style.cssText+newVal
 			}
 		}
@@ -448,9 +454,9 @@ class Element extends HTMLElement {
 
 	#toggleVisibility(ev) {
 		const list = this.#$(ms.domElementIds.list)
-		const isCurrentlyVisible = list.style.display !== "block"
+		const isCurrentlyVisible = list.style.display !== "" && list.style.display !== "none"
 
-		isCurrentlyVisible ? list.style.display = "block" : list.style.display = "none"
+		if(isCurrentlyVisible) {list.style.display = "none"} else {list.style.display = "block"}
 
 		if(!this.#_isMultiselect && isCurrentlyVisible) {
 			const selEl = this.#getCurrentlySingleSelectedElement()

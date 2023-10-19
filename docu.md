@@ -78,6 +78,11 @@ Note: triggers invocation of onSelected callback.
 
     document.getElementById("selectCountry").selected = ["UG"]
 
+## getting selection
+
+    const x = document.getElementById("selectCountry").selected
+    x is a Map (key=key, value=text displayed in item-list)
+
 ## locked
 
 prohibit user from selecting/deselecting items.
