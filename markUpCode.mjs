@@ -8,7 +8,7 @@ export default class MarkUpCode {
 	static mainElements(ms) {
 		return `
 		<div id='${ms.domElementIds.headBox}' tabindex="0">
-		  <div id='${ms.domElementIds.headBoxContent}'>&varnothing;</div>
+		  <div id='${ms.domElementIds.headBoxContent}' style="display:flex; align-items:center;">&varnothing;</div>
 		  <ul id='${ms.domElementIds.list}'></ul>
 		</div>
 		`
@@ -39,7 +39,6 @@ export default class MarkUpCode {
 			height: 1.8em;
 			width: 100%;
 			overflow: hidden;
-			margin-top: 0.4em;
 			margin-left: 0.3em;
 			text-align: left;
 		}
@@ -129,7 +128,6 @@ export default class MarkUpCode {
 			color: #fff;
 			display: inline-flex;
 			font: normal normal 400 0.8rem/0.2rem Arial,sans-serif;
-			vertical-align: bottom;
 			height: auto;
 			justify-content: center;
 			padding: 0.75rem;
@@ -137,6 +135,7 @@ export default class MarkUpCode {
 			height: 0px;
 			width: 0px;
 			margin-right: 5px;
+			margin-top: -2px;
 		}
 
 		ul {}
@@ -273,11 +272,13 @@ export default class MarkUpCode {
 	}
 
 	static headBoxContent(text, numba) {
+		let retVal = "<span style='display:flex; align-items:center; margin-top:2px;'>"
 		if(numba===null) {
-			return "<span>" + text + "</span>"
+			retVal += text
 		} else {
-			return "<span>"+this.circledNumber(numba) + text + "</span>"
+			retVal += this.circledNumber(numba) + text
 		}
+		return retVal+"</span>"
 	}
 
 	static image(path, key) {
