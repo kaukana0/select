@@ -152,7 +152,7 @@ class Element extends HTMLElement {
 
 
 	static get observedAttributes() {
-		return ['data', 'onSelect', 'onSelected', 'style', 'multiselect', 'textformultiselect']
+		return ['data', 'onSelect', 'onSelected', 'multiselect', 'textformultiselect']
 	}
 
 	attributeChangedCallback(name, oldVal, newVal) {
@@ -179,12 +179,13 @@ class Element extends HTMLElement {
 				}
 			}
 		}
-		if(name === 'style') {
-			if(newVal) {
-				// relay anything to this element's main container
-				this.#$(ms.domElementIds.headBox).style.cssText = this.#$(ms.domElementIds.headBox).style.cssText+newVal
-			}
-		}
+		//if(name === 'style') {
+		//	if(newVal) {
+		//		// relay anything to this element's main container
+		//		this.#$(ms.domElementIds.headBox).style.cssText = this.#$(ms.domElementIds.headBox).style.cssText+newVal
+		//		console.log("select", newVal, ",",this.#$(ms.domElementIds.headBox).style.cssText)
+		//	}
+		//}
 		if(name === 'textformultiselect') {
 			this.textForMultiselect = newVal
 		}
