@@ -244,7 +244,7 @@ export default class MarkUpCode {
 	}
 
 	static button(symbol, attribs) {
-		return `<div tabindex="0" style="height:40px;" favstar><symbol-button id="${symbol}" symbol="${symbol}" ${attribs}></symbol-button></div>`
+		return `<div tabindex="0" style="height:40px; width:40px;" favstar><symbol-button style="width:100%; height:100%;" id="${symbol}" symbol="${symbol}" ${attribs}></symbol-button></div>`
 	}
 
 	static groupHeader(ms=null, text="", isSelectable=false, hasSeparator=true, enabled=false) {
