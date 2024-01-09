@@ -337,8 +337,10 @@ class Element extends HTMLElement {
 		if(el.hasAttribute("isCheckable")) {
 			if(isChecked) {
 				el.firstElementChild.firstElementChild.firstElementChild.setAttribute("checked", true)
+				el.firstElementChild.firstElementChild.firstElementChild.setAttribute("aria-selected", true)
 			} else {
 				el.firstElementChild.firstElementChild.firstElementChild.removeAttribute("checked")
+				el.firstElementChild.firstElementChild.firstElementChild.setAttribute("aria-selected", false)
 			}
 		}
 	}

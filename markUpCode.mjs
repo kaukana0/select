@@ -218,7 +218,7 @@ export default class MarkUpCode {
 
 	static singleSelectItem(ms, key, val, enabled=true) {
 		return `
-			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable>
+			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable role="option">
 				${MarkUpCode.grid(1, `<div>${val}</div>`)}
 			</li>
 		`
@@ -232,7 +232,7 @@ export default class MarkUpCode {
 		// should it be set programatically, otherwise the ecl-like-select-x JS doesn't
 		// know that it's checked and everything goes out of sync
 		return `
-			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" isSelectable isCheckable isCollectable>
+			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" isSelectable isCheckable isCollectable role="option">
 				${MarkUpCode.grid(fractions, `
 					<div class="item ${indented?"indented":""}  ${enabled?"":"disabled"}   ">
 						${this.checkbox(enabled)}
@@ -270,7 +270,7 @@ export default class MarkUpCode {
 	// note: transform makes a y-scrollbar appear. it goes away w/ specifying some height.
 	static checkbox(enabled=true, checked=false) {
 		const cl = enabled?"":"border-color:lightgrey;"
-		return `<input ${cl} type='checkbox' ${checked?"checked=true":""} style="pointer-events: none; accent-color: #0e47cb; ${cl}"></input>`
+		return `<input ${cl} type='checkbox' ${checked?"checked=true":""} style="pointer-events: none; accent-color: #0e47cb; ${cl}"  aria-selected="${checked?"true":"false"}   ></input>`
 	}
 
 	static headBoxContent(text, numba) {
