@@ -226,13 +226,13 @@ export default class MarkUpCode {
 
 	static multiSelectItem(ms, key, val, hasFavStar=false, fractions=1, indented=false, enabled=true) {
 		const favStarHtml =  hasFavStar ? 
-		MarkUpCode.button("star", "favstar")
+		MarkUpCode.button()
 		 : ""
 		// the pointer-events thing makes it ignore events - only from the js
 		// should it be set programatically, otherwise the ecl-like-select-x JS doesn't
 		// know that it's checked and everything goes out of sync
 		return `
-			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable isCheckable isCollectable>
+			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" isSelectable isCheckable isCollectable>
 				${MarkUpCode.grid(fractions, `
 					<div class="item ${indented?"indented":""}  ${enabled?"":"disabled"}   ">
 						${this.checkbox(enabled)}
@@ -243,8 +243,10 @@ export default class MarkUpCode {
 		`
 	}
 
-	static button(symbol, attribs) {
-		return `<div tabindex="0" style="height:40px; width:40px;" favstar><symbol-button style="width:100%; height:100%;" id="${symbol}" symbol="${symbol}" ${attribs}></symbol-button></div>`
+	static button() {
+		return `<div style="height:40px; width:40px; pointer-events: none;" favstar>
+			<symbol-button style="width:100%; height:100%;" symbol="starFilled" symbolDeactivated="star"></symbol-button>
+		</div>`
 	}
 
 	static groupHeader(ms=null, text="", isSelectable=false, hasSeparator=true, enabled=false) {
@@ -257,7 +259,7 @@ export default class MarkUpCode {
 			const styleDisabled = enabled ? "" : "color:grey;"
 
 			return (hasSeparator ? this.separator() : "") + `
-				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' tabindex='0' ${is} style='${styleSel} ${styleDisabled}' isGroupStart='true'>
+				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' ${is} style='${styleSel} ${styleDisabled}' isGroupStart='true'>
 					${MarkUpCode.grid(99, `<div class="item groupHeader ${enabled?"":"disabled"}">${sel} <p style="margin:2px 10px;">${text}</p></div>`)}
 				</li>
 			`

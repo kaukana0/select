@@ -256,24 +256,35 @@ class Element extends HTMLElement {
 
 		function addEventListeners(key, val) {
 			const elId = ms.domElementIds.listItemPrefix + that.#stringHash(key)
-			window.requestAnimationFrame(() => that.#$(elId).onclick = (ev) => {
 
-				if( ev.target.hasAttribute("favstar") ) {
-					that.#setFavorite(key)
-				} 
+			window.requestAnimationFrame(() => {
+				const el = that.#$(elId)
 
-				that.#onListItemClick(key, val)
-
-				if(that.#_isMultiselect) {
-					ev.stopPropagation()	// don't close dropdown list
-				}
-			})
-
-			window.requestAnimationFrame(() => that.#$(elId).onkeydown = (e) => {
-				if(e.keyCode==13) {
+				el.onclick = (ev) => {
 					that.#onListItemClick(key, val)
+					if(that.#_isMultiselect) {
+						ev.stopPropagation()	// don't close dropdown list
+					}
 				}
+
+				const favStar = el.querySelector("symbol-button")
+				if(favStar) {
+					favStar.addEventListener("action", (ev)=> {
+						console.log("BANG AUA")
+						that.#setFavorite(key)
+						ev.stopPropagation()
+					},
+					true)
+				}
+
+				el.onkeydown = (e) => {
+					if(e.key=="Enter" && e.target.nodeName!=="SYMBOL-BUTTON") {
+						that.#onListItemClick(key, val)
+					}
+				}
+
 			})
+
 		}
 
 		function setInitiallySelected(key, text) {
@@ -343,10 +354,12 @@ class Element extends HTMLElement {
 	#setFavorite(key) {
 		if(this.#_currentFavStar !== "") {
 			const currentElId = ms.domElementIds.listItemPrefix + this.#stringHash(this.#_currentFavStar)
-			this.#$(currentElId).querySelector("div [favstar]").innerHTML= MarkUpCode.button("star", "favstar")
+			this.#$(currentElId).querySelector("div symbol-button").setActivated=false
 		}
+
 		const newElId = ms.domElementIds.listItemPrefix + this.#stringHash(key)
-		this.#$(newElId).querySelector("div [favstar]").innerHTML = MarkUpCode.button("starFilled", "favstar")
+		this.#$(newElId).querySelector("div symbol-button").setActivated=true
+
 		this.#_currentFavStar=key
 	}
 
