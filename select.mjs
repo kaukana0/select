@@ -270,7 +270,6 @@ class Element extends HTMLElement {
 				const favStar = el.querySelector("symbol-button")
 				if(favStar) {
 					favStar.addEventListener("action", (ev)=> {
-						console.log("BANG AUA")
 						that.#setFavorite(key)
 						ev.stopPropagation()
 					},
