@@ -161,31 +161,23 @@ class Element extends HTMLElement {
 		}
 		if(name === 'multiselect') {
 			this.connectedCallback()
-			if(this.#_selected.size > 0) {
-				this.#_isMultiselect = newVal === "true"
-				if(!this.#_isMultiselect) {	// when being switched off, select 1
-					this.#deselectAll()
+			this.#_isMultiselect = newVal === "true"
+			if(this.#_selected.size > 1) {
+				if(this.#_isMultiselect) {
+					this.#updateHeadBoxContent()	
+				} else {
+					// when being switched off, select the first one
 					if(this.#_currentFavStar === "") {
-						if(this.#_selected.size>0) {
-							this.#selectOne(this.#_selected.keys()[0])
-						} else {
-							console.error("select: no currentFavStar, no currently selected")
-						}
+						this.#selectOne(this.#_selected.keys().next().value)
 					} else {
 						this.#selectOne(this.#_currentFavStar)
 					}
-				} else {
-					this.#updateHeadBoxContent()	
 				}
+			} else {
+				this.#updateHeadBoxContent()	
 			}
 		}
-		//if(name === 'style') {
-		//	if(newVal) {
-		//		// relay anything to this element's main container
-		//		this.#$(ms.domElementIds.headBox).style.cssText = this.#$(ms.domElementIds.headBox).style.cssText+newVal
-		//		console.log("select", newVal, ",",this.#$(ms.domElementIds.headBox).style.cssText)
-		//	}
-		//}
+
 		if(name === 'textformultiselect') {
 			this.textForMultiselect = newVal
 		}
@@ -270,7 +262,6 @@ class Element extends HTMLElement {
 				const favStar = el.querySelector("symbol-button")
 				if(favStar) {
 					favStar.addEventListener("action", (ev)=> {
-						console.log("BANG AUA")
 						that.#setFavorite(key)
 						ev.stopPropagation()
 					},
@@ -329,7 +320,7 @@ class Element extends HTMLElement {
 			this.#setChecked(el, true)
 			this.#updateHeadBoxContent()
 		} else {
-			console.warn("ecl-like-select-x: can't select missing element", elId)
+			console.warn("ecl-like-select-x: can't select, element doesn't exist", elId)
 		}
 	}
 
@@ -431,6 +422,7 @@ class Element extends HTMLElement {
 		function handleSingleSelectClick() {
 			const selectionChanged = key !== that.#_selected.keys().next().value
 			if(selectionChanged) {
+				if(that.#_onSelect && that.#_onSelect(key,val)===false) {return} 
 				that.#selectOne(key)
 				action()
 			} else {
@@ -444,7 +436,7 @@ class Element extends HTMLElement {
 		}
 
 	}
-	
+
 	// return undefined is the same as true
 	#invokeCallback(key,val) {
 		if(this.#_onSelected !== undefined) {
