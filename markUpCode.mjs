@@ -198,7 +198,7 @@ export default class MarkUpCode {
 			color:white;
 		}
 		input[type="checkbox"]:checked:before {
-			content:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' viewBox='0 0 24 24' focusable='false' aria-hidden='true' class='ecl-icon ecl-icon--s ecl-checkbox__icon'%3E%3Cpath fill='white' d='m19.2 6.4-9.9 9.9-3.5-3.6c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l4.2 4.2c.4.4 1 .4 1.4 0L20.6 7.8c.4-.4.4-1 0-1.4-.2-.2-.5-.3-.7-.3-.3 0-.5.1-.7.3z'%3E%3C/path%3E%3C/svg%3E");
+			content:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' viewBox='0 0 24 24' focusable='false' aria-hidden='true' %3E %3Cpath fill='white' d='m19.2 6.4-9.9 9.9-3.5-3.6c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l4.2 4.2c.4.4 1 .4 1.4 0L20.6 7.8c.4-.4.4-1 0-1.4-.2-.2-.5-.3-.7-.3-.3 0-.5.1-.7.3z'%3E%3C/path%3E%3C/svg%3E");
 		}
 		</style>`
 
