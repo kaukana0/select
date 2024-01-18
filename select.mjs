@@ -39,7 +39,7 @@ class Element extends HTMLElement {
 	#_isMultiselect	// bool; from an attribute
 	#_onSelect 			// function; from an attribute; callback before a selection happens; if returns false, (de)selection is avoided, allowed in any other case
 	#_onSelected		// function; from an attribute; callback after a selection happened
-	#_hasFavoriteStar	// bool; from an attribute; for each entry, show fav star on the right side in the line area
+	#_hasFavoriteStar	// bool; from an attribute; for every entry, show fav star on the right side in the line area
 	#_currentFavStar	// key of current favourite
 	#_fractions		// # of fractions of left side of the listitem list (relevent only for favoriteStar. see docu.md)
 	#_selected = new Map()
@@ -86,14 +86,14 @@ class Element extends HTMLElement {
 		this.#_hasFavoriteStar = this.hasAttribute('favoriteStar') ? this.getAttribute('favoriteStar')==="true" : false
 		this.#_fractions = this.hasAttribute('fractions') ? this.getAttribute('fractions') : 99		// the higher, the more towards 1 column
 		if(!this.#_isInitialized) {
-
 			this.#registerEvents()	
 			this.#makeDismissable()
 			this.#_isInitialized = true
 		}
 	}
 
-	disconnectedCallback() { console.debug("ecl-like-select-x: disconnected", this.getAttribute("id"))	}
+	disconnectedCallback() { console.debug("ecl-like-select-x: removed from document", this.getAttribute("id"))	}
+	adoptedCallback() { console.debug("ecl-like-select-x: moved to another document", this.getAttribute("id"))	}
 
 	set data(val) {	this.#fill(val[0], val[1]) }
 
@@ -166,7 +166,7 @@ class Element extends HTMLElement {
 				if(this.#_isMultiselect) {
 					this.#updateHeadBoxContent()	
 				} else {
-					// when being switched off, select the first one
+					// when being switched off, select first or fav
 					if(this.#_currentFavStar === "") {
 						this.#selectOne(this.#_selected.keys().next().value)
 					} else {
@@ -465,7 +465,6 @@ class Element extends HTMLElement {
 		const isCurrentlyVisible = list.style.display !== "" && list.style.display !== "none"
 
 		if(isCurrentlyVisible) {list.style.display = "none"} else {list.style.display = "block"}
-
 		if(!this.#_isMultiselect && isCurrentlyVisible) {
 			const selEl = this.#getCurrentlySingleSelectedElement()
 			//if(selEl) { selEl.scrollIntoView() }
