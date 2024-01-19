@@ -49,6 +49,7 @@ class Element extends HTMLElement {
 	#_isInitialized
 	#_textForMultiselect	// what should be displayed if multiple are selected. eg "items selected"
 	#_disabledSelections	// [] of keys
+	#_displayKeys	// bool; from an attribute; for each entry, show it's key in a right-aligned column
 
 	#$(elementId) {
 		return this.shadowRoot.getElementById(elementId)
@@ -85,6 +86,7 @@ class Element extends HTMLElement {
 		this.#_isMultiselect = this.hasAttribute('multiselect') ? this.getAttribute('multiselect')==="true" : false
 		this.#_hasFavoriteStar = this.hasAttribute('favoriteStar') ? this.getAttribute('favoriteStar')==="true" : false
 		this.#_fractions = this.hasAttribute('fractions') ? this.getAttribute('fractions') : 99		// the higher, the more towards 1 column
+		this.#_displayKeys = this.hasAttribute('displaykeys') ? this.getAttribute('displaykeys')==="true" : false
 		if(!this.#_isInitialized) {
 			this.#registerEvents()	
 			this.#makeDismissable()
@@ -152,7 +154,7 @@ class Element extends HTMLElement {
 
 
 	static get observedAttributes() {
-		return ['data', 'onSelect', 'onSelected', 'multiselect', 'textformultiselect']
+		return ['data', 'onSelect', 'onSelected', 'multiselect', 'textformultiselect', 'displaykeys', 'fractions']
 	}
 
 	attributeChangedCallback(name, oldVal, newVal) {
@@ -180,6 +182,10 @@ class Element extends HTMLElement {
 
 		if(name === 'textformultiselect') {
 			this.textForMultiselect = newVal
+		}
+
+		if(name === 'displaykeys') {
+			this.displayKeys = newVal === "true"
 		}
 	}
 
@@ -240,7 +246,7 @@ class Element extends HTMLElement {
 
 		function insertItem(key, val, indent, enabled) {
 			if(that.#_isMultiselect) {
-				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.multiSelectItem(ms, that.#stringHash(key), val, that.#_hasFavoriteStar, that.#_fractions, indent, enabled)
+				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.multiSelectItem(ms, that.#stringHash(key), val, that.#_hasFavoriteStar, that.#_fractions, indent, enabled, that.#_displayKeys)
 			} else {
 				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.singleSelectItem(ms, that.#stringHash(key), val, enabled)
 			}

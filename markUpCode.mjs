@@ -224,13 +224,9 @@ export default class MarkUpCode {
 		`
 	}
 
-	static multiSelectItem(ms, key, val, hasFavStar=false, fractions=1, indented=false, enabled=true) {
-		const favStarHtml =  hasFavStar ? 
-		MarkUpCode.button()
-		 : ""
-		// the pointer-events thing makes it ignore events - only from the js
-		// should it be set programatically, otherwise the ecl-like-select-x JS doesn't
-		// know that it's checked and everything goes out of sync
+	static multiSelectItem(ms, key, val, hasFavStar=false, fractions=1, indented=false, enabled=true, displayKeys=false) {
+		const favStarHtml =  hasFavStar ? MarkUpCode.button() : ""
+		const keyHtml = displayKeys ? key : ""
 		return `
 			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" isSelectable isCheckable isCollectable role="option">
 				${MarkUpCode.grid(fractions, `
@@ -238,12 +234,17 @@ export default class MarkUpCode {
 						${this.checkbox(enabled)}
 						<p style="margin:2px 10px;">${val}</p>
 					</div>
-						${favStarHtml}`)}
+						${favStarHtml}
+						${keyHtml}
+						`)}
 			</li>
 		`
 	}
 
 	static button() {
+		// the pointer-events thing makes it ignore events - only from the js
+		// should it be set programatically, otherwise the ecl-like-select-x JS doesn't
+		// know that it's checked and everything goes out of sync
 		return `<div style="height:40px; width:40px; pointer-events: none;" favstar>
 			<symbol-button style="width:100%; height:100%;" symbol="starFilled" symbolDeactivated="star"></symbol-button>
 		</div>`
