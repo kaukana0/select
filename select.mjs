@@ -181,7 +181,7 @@ class Element extends HTMLElement {
 		}
 
 		if(name === 'textformultiselect') {
-			this.textForMultiselect = newVal
+			this.#_textForMultiselect = newVal
 		}
 
 		if(name === 'displaykeys') {
