@@ -37,7 +37,7 @@ const ms = {
 class Element extends HTMLElement {
 
 	#_isMultiselect	// bool; from an attribute
-	#_onSelect 			// function; from an attribute; callback before a selection happens; if returns false, (de)selection is avoided, allowed in any other case
+	#_onSelect 			// function; from an attribute; callback before a selection happens; if returns false, (de)selection is avoided, allowed in any other case. passes (key,value,isDeselect) to callback.
 	#_onSelected		// function; from an attribute; callback after a selection happened
 	#_hasFavoriteStar	// bool; from an attribute; for every entry, show fav star on the right side in the line area
 	#_currentFavStar	// key of current favourite
@@ -369,6 +369,8 @@ class Element extends HTMLElement {
 		this.#$(ms.domElementIds.headBoxContent).innerHTML = html
 	}
 
+	#isDeselect(key) { return Array.from( this.#_selected.keys() ).includes(key) }
+
 	#onListItemClick(key, val) {
 		if(this.#_isLocked) return
 		const that = this
@@ -377,7 +379,7 @@ class Element extends HTMLElement {
 
 		if(this.#_isMultiselect) {
 			if(el.hasAttribute("isGroupStart")) {
-				if(that.#_onSelect && that.#_onSelect(key,val)===false) {return}
+				if(that.#_onSelect && that.#_onSelect(key,val,this.#isDeselect(key))) {return}
 				this.#deselectAll()
 				this.#selectOne(key)
 				let next = el.nextElementSibling
@@ -398,7 +400,7 @@ class Element extends HTMLElement {
 		function handleMultiSelectClick(el) {
 			if(that.#_selected.has(key)) {
 				if(that.#_selected.size > 1) {
-					if(that.#_onSelect && that.#_onSelect(key,val)===false) {return} 
+					if(that.#_onSelect && that.#_onSelect(key,val,that.#isDeselect(key))===false) {return} 
 					that.#_selected.delete(key)
 					that.#setChecked(el, false)
 					action()
@@ -406,7 +408,7 @@ class Element extends HTMLElement {
 					// nop (at least 1 has to be selected at all times)
 				}
 			} else {
-				if(that.#_onSelect && that.#_onSelect(key,val)===false) {return} 
+				if(that.#_onSelect && that.#_onSelect(key,val,that.#isDeselect(key))===false) {return} 
 				that.#selectOne(key)
 				alignOrderOfSelectedItems()
 				if(el.hasAttribute("isSelectable")) {
@@ -428,7 +430,7 @@ class Element extends HTMLElement {
 		function handleSingleSelectClick() {
 			const selectionChanged = key !== that.#_selected.keys().next().value
 			if(selectionChanged) {
-				if(that.#_onSelect && that.#_onSelect(key,val)===false) {return} 
+				if(that.#_onSelect && that.#_onSelect(key,val,that.#isDeselect(key))===false) {return} 
 				that.#selectOne(key)
 				action()
 			} else {
