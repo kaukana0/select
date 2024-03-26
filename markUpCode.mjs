@@ -20,11 +20,11 @@ export default class MarkUpCode {
 			position:relative;
 			display: flex;
 			cursor: pointer;
-			height: 2em;
+			height: 37px;
 			align-items: center;
 			padding: 0.2em;
 			/*font-weight: bold;*/
-			font-size: 1.1rem;
+			font-size: 1rem;
 
 			margin-left: 1px;
 			margin-right: 1px;
@@ -41,6 +41,7 @@ export default class MarkUpCode {
 			overflow: hidden;
 			margin-left: 0.3em;
 			text-align: left;
+			color: #141517;
 		}
 		
 		/* this is bootstrap's CSS triangle; only positionable here via margin */
@@ -67,7 +68,7 @@ export default class MarkUpCode {
 			border-bottom-right-radius: 3px;
 			pointer-events: none;
 		}
-		
+
 		#${ms.domElementIds.list} {
 			display: none;
 			list-style: none;
@@ -76,7 +77,7 @@ export default class MarkUpCode {
 			border: 1px solid rgba(0,0,0,1);
 			z-index: ${zIndex};
 			max-height: 400px;
-			top: 1.8em;
+			top: 27px;
 			margin-left: 0px;
 			margin-right: 0px;
 			padding-left: 0.3em;
@@ -146,7 +147,7 @@ export default class MarkUpCode {
 		}
 
 		.item {
-			color: #000;
+			color: #171A22;
 			display: inline-flex;
 			flex-flow: row;
 
@@ -216,10 +217,10 @@ export default class MarkUpCode {
 		`
 	}
 
-	static singleSelectItem(ms, key, val, enabled=true) {
+	static singleSelectItem(ms, key, val, enabled=true, fractions=3) {
 		return `
 			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable role="option">
-				${MarkUpCode.grid(1, `<div>${val}</div>`)}
+				${MarkUpCode.grid(fractions, `<div>${val}</div>`)}
 			</li>
 		`
 	}
@@ -261,7 +262,7 @@ export default class MarkUpCode {
 
 			return (hasSeparator ? this.separator() : "") + `
 				<li id='${ms.domElementIds.listItemPrefix}${text}' key='${text}' val='${text}' ${is} style='${styleSel} ${styleDisabled}' isGroupStart='true'>
-					${MarkUpCode.grid(99, `<div class="item groupHeader ${enabled?"":"disabled"}">${sel} <p style="margin:2px 10px;">${text}</p></div>`)}
+					${MarkUpCode.grid(3, `<div class="item groupHeader ${enabled?"":"disabled"}">${sel} <p style="margin:2px 10px;">${text}</p></div>`)}
 				</li>
 			`
 		}

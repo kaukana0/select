@@ -65,6 +65,8 @@ class Element extends HTMLElement {
 		this.#_defaultSelections = []
 		this.#_disabledSelections = []
 
+		this.#_fractions = this.hasAttribute('fractions') ? this.getAttribute('fractions') : 99		// the higher, the more towards 1 column
+
 		this.attachShadow({ mode: 'open' })
 		const tmp = MarkUpCode.getHtmlTemplate(MarkUpCode.mainElements(ms) + MarkUpCode.css(ms, 5)).cloneNode(true)
 		this.shadowRoot.appendChild(tmp)
@@ -85,7 +87,6 @@ class Element extends HTMLElement {
 	connectedCallback() {
 		this.#_isMultiselect = this.hasAttribute('multiselect') ? this.getAttribute('multiselect')==="true" : false
 		this.#_hasFavoriteStar = this.hasAttribute('favoriteStar') ? this.getAttribute('favoriteStar')==="true" : false
-		this.#_fractions = this.hasAttribute('fractions') ? this.getAttribute('fractions') : 99		// the higher, the more towards 1 column
 		this.#_displayKeys = this.hasAttribute('displaykeys') ? this.getAttribute('displaykeys')==="true" : false
 		if(!this.#_isInitialized) {
 			this.#registerEvents()	
@@ -187,6 +188,11 @@ class Element extends HTMLElement {
 		if(name === 'displaykeys') {
 			this.displayKeys = newVal === "true"
 		}
+
+		if(name === 'fractions') {
+			this.#_fractions = newVal
+			console.error("ecl-like-select-x: setting fractions at runtime is not supported")
+		}
 	}
 
 	// note: very naive. collision prone!
@@ -248,7 +254,7 @@ class Element extends HTMLElement {
 			if(that.#_isMultiselect) {
 				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.multiSelectItem(ms, that.#stringHash(key), val, that.#_hasFavoriteStar, that.#_fractions, indent, enabled, that.#_displayKeys)
 			} else {
-				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.singleSelectItem(ms, that.#stringHash(key), val, enabled)
+				that.#$(ms.domElementIds.list).innerHTML += MarkUpCode.singleSelectItem(ms, that.#stringHash(key), val, enabled, that.#_fractions)
 			}
 		}
 
