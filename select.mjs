@@ -385,7 +385,7 @@ class Element extends HTMLElement {
 
 		if(this.#_isMultiselect) {
 			if(el.hasAttribute("isGroupStart")) {
-				if(that.#_onSelect && that.#_onSelect(key,val,this.#isDeselect(key))) {return}
+				if(that.#_onSelect && that.#_onSelect(key,val,this.#isDeselect(key))===false) {return}
 				this.#deselectAll()
 				this.#selectOne(key)
 				let next = el.nextElementSibling
