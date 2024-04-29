@@ -60,7 +60,7 @@ export default class MarkUpCode {
 			text-align: center;
 			position: absolute;
 			width: 44px;
-			height: 43px;
+			height: 44px;
 			background: #0E47CB;
 			right: 0px;
 			border: 0px;
