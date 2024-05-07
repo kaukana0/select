@@ -307,7 +307,7 @@ export default class MarkUpCode {
 	}
 
 	static headBoxContent(text, numba, rightAlignedText) {
-		let retVal = "<span style='display:flex; align-items:center; margin-top:2px;'>"
+		let retVal = "<span style='display:flex; align-items:center; flex-grow:1; margin-top:2px;'>"
 		if(numba===null) {
 			retVal += text
 		} else {
@@ -315,7 +315,7 @@ export default class MarkUpCode {
 		}
 		retVal+="</span>"
 		if(rightAlignedText != "") {
-			retVal += "<span style='flex-grow:1;'>"+rightAlignedText+"</span>"
+			retVal += "<span style='align-items:center; padding-right:50px;'>"+rightAlignedText+"</span>"
 		}
 		return retVal
 	}
