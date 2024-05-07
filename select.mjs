@@ -52,6 +52,7 @@ class Element extends HTMLElement {
 	#_disabledSelections	// [] of keys
 	#_displayKeys	// bool; from an attribute; for each entry, show it's key in a right-aligned column
 	#_displayKeyInHeadbox		// right aligned
+	#_hasReset
 
 	#$(elementId) {
 		return this.shadowRoot.getElementById(elementId)
@@ -66,6 +67,7 @@ class Element extends HTMLElement {
 		this.#_currentFavStar = ""
 		this.#_defaultSelections = []
 		this.#_disabledSelections = []
+		this.#_hasReset = false
 
 		this.#_fractions = this.hasAttribute('fractions') ? this.getAttribute('fractions') : 99		// the higher, the more towards 1 column
 
@@ -173,7 +175,8 @@ class Element extends HTMLElement {
 			this.#_isMultiselect = newVal === "true"
 			if(this.#_selected.size > 1) {
 				if(this.#_isMultiselect) {
-					this.#updateHeadBoxContent()	
+					this.#updateHeadBoxContent()
+					this.#updateResetButton()
 				} else {
 					// when being switched off, select first or fav
 					if(this.#_currentFavStar === "") {
@@ -183,7 +186,8 @@ class Element extends HTMLElement {
 					}
 				}
 			} else {
-				this.#updateHeadBoxContent()	
+				this.#updateHeadBoxContent()
+				this.#updateResetButton()
 			}
 		}
 
@@ -201,7 +205,7 @@ class Element extends HTMLElement {
 		}
 
 		if(name === 'resetbutton') {
-			this.#$(ms.domElementIds.btn).style.display = newVal==="true"?"inline-block":"none"
+			this.#_hasReset = newVal==="true"
 		}
 
 		if(name === 'displaykeyinheadbox') {
@@ -346,6 +350,7 @@ class Element extends HTMLElement {
 			}
 			this.#setChecked(el, true)
 			this.#updateHeadBoxContent()
+			this.#updateResetButton()
 		} else {
 			console.warn("ecl-like-select-x: can't select, element doesn't exist", elId)
 		}
@@ -462,6 +467,7 @@ class Element extends HTMLElement {
 		}
 
 		function action() {
+			that.#updateResetButton()
 			that.#updateHeadBoxContent()
 			that.#invokeCallback(key, val)
 		}
@@ -531,6 +537,39 @@ class Element extends HTMLElement {
 				}
 			}
 		}
+	}
+
+	#updateResetButton() {
+		this.#$(ms.domElementIds.btn).style.display = this.#_hasReset===true && !this.#isDefaultSelected() ?"inline-block":"none"
+	}
+
+	#isDefaultSelected() {
+		console.log(this.#_defaultSelections.length)
+		if(this.#_defaultSelections.length === 0) {
+			// anything else then the 1st one selected?
+			var items = this.#$(ms.domElementIds.list).getElementsByTagName("li");
+			for (let i = 1; i < items.length; i++) {
+				if(items[i].hasAttribute("ischeckable") && items[i].firstElementChild.firstElementChild.firstElementChild.hasAttribute("checked")) {
+					return false
+				}
+			}
+			return true
+		} else {
+			
+			if(this.#_selected.size === this.#_defaultSelections.size) {
+				
+				let retVal = true
+				for (let [key, val] of this.#_selected) {
+					console.log(key, val)
+					if(!this.#_defaultSelections.includes(key)) {retVal=false}
+				}
+				return retVal
+
+			} else {
+				return false
+			}
+		}
+		return true
 	}
 
 }
