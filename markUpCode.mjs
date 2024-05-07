@@ -9,7 +9,12 @@ export default class MarkUpCode {
 		return `
 		<div id='${ms.domElementIds.headBox}' tabindex="0">
 		  <div id='${ms.domElementIds.headBoxContent}' style="display:flex; align-items:center;">&varnothing;</div>
-		  <ul id='${ms.domElementIds.list}'></ul>
+			<div id='${ms.domElementIds.listContainer}'>
+				<ul id='${ms.domElementIds.list}'></ul>
+				<center>
+					<button id='${ms.domElementIds.btn}' type="button">Reset</button>
+				</center>
+			</div>
 		</div>
 		`
 	}
@@ -69,15 +74,14 @@ export default class MarkUpCode {
 			pointer-events: none;
 		}
 
-		#${ms.domElementIds.list} {
+		#${ms.domElementIds.listContainer} {
 			display: none;
-			list-style: none;
 			background-color: #fff;
-			overflow: auto;
+			overflow: hidden;
 			border: 1px solid rgba(0,0,0,1);
 			z-index: ${zIndex};
 			max-height: 400px;
-			top: 27px;
+			top: 43px;
 			margin-left: 0px;
 			margin-right: 0px;
 			padding-left: 0.3em;
@@ -87,6 +91,14 @@ export default class MarkUpCode {
 			text-align: left;
 			font-weight: normal;
 			font-size: 1rem;
+		}
+		
+		#${ms.domElementIds.list} {
+			list-style: none;
+			padding-inline-start: 0;
+			max-height: 300px;
+			overflow: auto;
+			margin:0;
 		}
 		
 		#${ms.domElementIds.list} li {
@@ -167,6 +179,25 @@ export default class MarkUpCode {
 		.disabled {
 			color: grey;
 		}
+
+		#${ms.domElementIds.btn} {
+			overflow: visible;
+			text-transform: none;
+			appearance: none;
+			background: none;
+			border-radius: 4px;
+			cursor: pointer;
+			display: none;
+			margin: 0;
+			min-width: 44px;
+			text-decoration: none;
+			background-color: #0e47cb;
+			border: 2px solid #0e47cb;
+			color: #fff;
+			width: 80%;
+			min-height: 2.5rem;
+			margin: 5px 0 5px 0;
+			}
 
 		</style>`
 
@@ -275,14 +306,18 @@ export default class MarkUpCode {
 		return `<input ${cl} type='checkbox' ${checked?"checked=true":""} style="pointer-events: none; accent-color: #0e47cb; ${cl}"  aria-selected="${checked?"true":"false"}   ></input>`
 	}
 
-	static headBoxContent(text, numba) {
+	static headBoxContent(text, numba, rightAlignedText) {
 		let retVal = "<span style='display:flex; align-items:center; margin-top:2px;'>"
 		if(numba===null) {
 			retVal += text
 		} else {
 			retVal += this.circledNumber(numba) + text
 		}
-		return retVal+"</span>"
+		retVal+="</span>"
+		if(rightAlignedText != "") {
+			retVal += "<span style='flex-grow:1;'>"+rightAlignedText+"</span>"
+		}
+		return retVal
 	}
 
 	static image(path, key) {

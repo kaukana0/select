@@ -26,7 +26,8 @@ const ms = {
 		headBoxContent: 'headBoxContent',		// mostly the same as a list entry (text and possibly image), possibly styled differently
 		list: 'DropdownList',           		// list below the box; initially invisible
 		listItemPrefix: 'ListItem',				// prefix for ids
-		spacer: 'spacer'						// pushes the little down arrow in the headbox over to the right
+		listContainer: 'listContainer',
+		btn: "btn"
 	},
 }
 
@@ -50,6 +51,7 @@ class Element extends HTMLElement {
 	#_textForMultiselect	// what should be displayed if multiple are selected. eg "items selected"
 	#_disabledSelections	// [] of keys
 	#_displayKeys	// bool; from an attribute; for each entry, show it's key in a right-aligned column
+	#_displayKeyInHeadbox		// right aligned
 
 	#$(elementId) {
 		return this.shadowRoot.getElementById(elementId)
@@ -79,8 +81,12 @@ class Element extends HTMLElement {
 					this.#toggleVisibility(e)
 				}
 				if(e.keyCode == 27) {
-					this.#$(ms.domElementIds.list).style.display = "none"
+					this.#$(ms.domElementIds.listContainer).style.display = "none"
 				}
+		})
+		this.#$(ms.domElementIds.btn).addEventListener('click', (ev) => {
+			this.selectDefaults()
+			this.#invokeCallback()
 		})
 	}
 
@@ -155,7 +161,7 @@ class Element extends HTMLElement {
 
 
 	static get observedAttributes() {
-		return ['data', 'onSelect', 'onSelected', 'multiselect', 'textformultiselect', 'displaykeys', 'fractions']
+		return ['data', 'onSelect', 'onSelected', 'multiselect', 'textformultiselect', 'displaykeys', 'fractions', 'resetbutton', 'displaykeyinheadbox']
 	}
 
 	attributeChangedCallback(name, oldVal, newVal) {
@@ -186,13 +192,22 @@ class Element extends HTMLElement {
 		}
 
 		if(name === 'displaykeys') {
-			this.displayKeys = newVal === "true"
+			this.#_displayKeys = newVal === "true"
 		}
 
 		if(name === 'fractions') {
 			this.#_fractions = newVal
 			console.error("ecl-like-select-x: setting fractions at runtime is not supported")
 		}
+
+		if(name === 'resetbutton') {
+			this.#$(ms.domElementIds.btn).style.display = newVal==="true"?"inline-block":"none"
+		}
+
+		if(name === 'displaykeyinheadbox') {
+			this.#_displayKeyInHeadbox = newVal==="true"
+		}
+		
 	}
 
 	// note: very naive. collision prone!
@@ -370,8 +385,10 @@ class Element extends HTMLElement {
 
 	#updateHeadBoxContent() {
 		const selectedCount = this.#_isMultiselect ? this.#_selected.size : null
-		const text = (this.#_textForMultiselect && this.#_isMultiselect && this.selected.size>1) ? this.#_textForMultiselect : Array.from(this.#_selected.values()).join()
-		const html = MarkUpCode.headBoxContent(text, selectedCount)
+		const useMultiselectText = this.#_textForMultiselect && this.#_isMultiselect && this.selected.size>1
+		const text = useMultiselectText ? this.#_textForMultiselect : Array.from(this.#_selected.values()).join()
+		const rightAlignedText = this.#_displayKeyInHeadbox && !useMultiselectText ? this.selected.keys().next().value : ""
+		const html = MarkUpCode.headBoxContent(text, selectedCount, rightAlignedText)
 		this.#$(ms.domElementIds.headBoxContent).innerHTML = html
 	}
 
@@ -475,7 +492,7 @@ class Element extends HTMLElement {
 	}
 
 	#toggleVisibility(ev) {
-		const list = this.#$(ms.domElementIds.list)
+		const list = this.#$(ms.domElementIds.listContainer)
 		const isCurrentlyVisible = list.style.display !== "" && list.style.display !== "none"
 
 		if(isCurrentlyVisible) {list.style.display = "none"} else {list.style.display = "block"}
@@ -496,7 +513,7 @@ class Element extends HTMLElement {
 		// note: use element in light DOM, not any element from inside this component
 		document.addEventListener('click', (e) => {
 			if(e.target.id != this.id) {
-				const el = this.#$(ms.domElementIds.list)
+				const el = this.#$(ms.domElementIds.listContainer)
 				el.style.display = "none"
 			}
 		})

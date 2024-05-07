@@ -5,18 +5,18 @@
 - set/get onSelected
 - set/get selected
 - get favoriteStar
-- get selectedKeys
 - set locked
 - fractions (attribute)
 - set defaultSelections
 - selectDefaults()
 - set disabledSelections
-
-Note: Properties become attributes.
+- displayKeys (attribute)
+- resetButton (attribute)
+- displayKeyInHeadbox (attribute)
 
 # usage in html
 
-    <dropdown-box id="selectCountry" multiselect fractions=3 ></dropdown-box>
+    <dropdown-box id="selectCountry" multiselect></dropdown-box>
 
 ## multiselect
 
@@ -43,6 +43,25 @@ Notes:
     - default is 3, so 1 quarter is for the right column
     - the bigger the number, the smaller the right column.
     - just try empirically until it's nice.
+
+## displayKeys
+
+- "true" shows keys on the right side
+- note: only implemented for multiselect items atm.
+
+## resetButton
+
+- "true" shows a reset button at the bottom
+- if clicked, calls selectDefaults()
+
+## selectDefaults()
+
+- a method which selects the defaults and unselects everything else
+- if no default is specified explicitly, the 1st item is assumed as default
+
+## displayKeyInHeadbox
+
+- "true" shows the key in the headbox, right aligned
 
 # usage in JS
 
@@ -100,4 +119,4 @@ note: can be set before and after setting data. when setting before, selectDefau
 
     document.getElementById("selectCountry").disabledSelections = ["GB"]
 
-note: has only effect if set before setting data.
+note: has only an effect if set before setting data
