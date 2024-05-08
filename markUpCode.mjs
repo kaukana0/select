@@ -11,7 +11,7 @@ export default class MarkUpCode {
 		  <div id='${ms.domElementIds.headBoxContent}' style="display:flex; align-items:center;">&varnothing;</div>
 			<div id='${ms.domElementIds.listContainer}'>
 				<ul id='${ms.domElementIds.list}'></ul>
-				<center>
+				<center id='${ms.domElementIds.btnC}'>
 					<button id='${ms.domElementIds.btn}' type="button">Reset</button>
 				</center>
 			</div>
@@ -25,17 +25,17 @@ export default class MarkUpCode {
 			position:relative;
 			display: flex;
 			cursor: pointer;
-			height: 37px;
+			height: 40px;
 			align-items: center;
-			padding: 0.2em;
+			//padding: 0.2em;
 			/*font-weight: bold;*/
 			font-size: 1rem;
 
-			margin-left: 1px;
-			margin-right: 1px;
-			border: 1px solid #515560;
+			//margin-left: 1px;
+			//margin-right: 1px;
+			border: 2px solid #0e47cb;
 			background-color: #fff;
-			border-radius: 3px;
+			border-radius: 4px;
 		  box-shadow: inset 0 2px 4px rgba(9,49,142,.08),inset 0 0 10px rgba(9,49,142,.04),inset 0 4px 5px rgba(9,49,142,.04),inset 0 -4px 4px rgba(9,49,142,.04);
 
 		}
@@ -44,7 +44,8 @@ export default class MarkUpCode {
 			height: 1.8em;
 			width: 100%;
 			overflow: hidden;
-			margin-left: 0.3em;
+			//margin-left: 0.3em;
+			padding-left: 14px;
 			text-align: left;
 			color: #141517;
 		}
@@ -78,19 +79,24 @@ export default class MarkUpCode {
 			display: none;
 			background-color: #fff;
 			overflow: hidden;
-			border: 1px solid rgba(0,0,0,1);
+			border: none;
 			z-index: ${zIndex};
 			max-height: 400px;
-			top: 43px;
+			top: 45px;
 			margin-left: 0px;
 			margin-right: 0px;
-			padding-left: 0.3em;
-			left: -1px;
-			width: 98.5%;
+			//padding-left: 0.3em;
+			left: -2px;
+			width: calc(100% + 4px);
 			position: absolute;
 			text-align: left;
 			font-weight: normal;
 			font-size: 1rem;
+
+			border-radius: 4px;
+			box-shadow: 0 2px 4px rgba(9,49,142,.08),0 0 10px rgba(9,49,142,.04),0 4px 5px rgba(9,49,142,.04),0 -4px 4px rgba(9,49,142,.04);
+			box-sizing: border-box;
+			cursor: default;
 		}
 		
 		#${ms.domElementIds.list} {
@@ -106,6 +112,7 @@ export default class MarkUpCode {
 			padding-left: 0.3em;
 			padding-right: 0.3em;
 			line-height: 1.8rem;
+			padding: 12px 16px 12px 16px;
 		}
 		
 		#${ms.domElementIds.list} li:hover {
@@ -137,7 +144,7 @@ export default class MarkUpCode {
 		.count {
 			align-items: center;
 			background-color: #0e47cb;
-			border-radius: 50%;
+			border-radius: 12px;
 			color: #fff;
 			display: inline-flex;
 			font: normal normal 400 0.8rem/0.2rem Arial,sans-serif;
@@ -180,6 +187,14 @@ export default class MarkUpCode {
 			color: grey;
 		}
 
+		#${ms.domElementIds.btnC} {
+			display: none;
+			width: 100%;
+			padding: 10px 0 10px 0;
+			border-top: solid 1px;
+			border-color: #cfdaf5;
+		}
+
 		#${ms.domElementIds.btn} {
 			overflow: visible;
 			text-transform: none;
@@ -187,7 +202,6 @@ export default class MarkUpCode {
 			background: none;
 			border-radius: 4px;
 			cursor: pointer;
-			display: none;
 			margin: 0;
 			min-width: 44px;
 			text-decoration: none;
@@ -232,6 +246,13 @@ export default class MarkUpCode {
 		input[type="checkbox"]:checked:before {
 			content:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' viewBox='0 0 24 24' focusable='false' aria-hidden='true' %3E %3Cpath fill='white' d='m19.2 6.4-9.9 9.9-3.5-3.6c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l4.2 4.2c.4.4 1 .4 1.4 0L20.6 7.8c.4-.4.4-1 0-1.4-.2-.2-.5-.3-.7-.3-.3 0-.5.1-.7.3z'%3E%3C/path%3E%3C/svg%3E");
 		}
+
+		hr {
+			width:90%; 
+			//color:#cfdaf5;
+			color: darkgrey;
+			border-top:0;
+		}
 		</style>`
 
 
@@ -264,7 +285,7 @@ export default class MarkUpCode {
 				${MarkUpCode.grid(fractions, `
 					<div class="item ${indented?"indented":""}  ${enabled?"":"disabled"}   ">
 						${this.checkbox(enabled)}
-						<p style="margin:2px 10px;">${val}</p>
+						<p style="margin:2px 0 2px 6px;">${val}</p>
 					</div>
 						${favStarHtml}
 						${keyHtml}
@@ -303,7 +324,7 @@ export default class MarkUpCode {
 	// note: transform makes a y-scrollbar appear. it goes away w/ specifying some height.
 	static checkbox(enabled=true, checked=false) {
 		const cl = enabled?"":"border-color:lightgrey;"
-		return `<input ${cl} type='checkbox' ${checked?"checked=true":""} style="pointer-events: none; accent-color: #0e47cb; ${cl}"  aria-selected="${checked?"true":"false"}   ></input>`
+		return `<input ${cl} type='checkbox' ${checked?"checked=true":""} style="pointer-events: none; accent-color: #0e47cb; ${cl}"  aria-selected="${checked?"true":"false"}"></input>`
 	}
 
 	static headBoxContent(text, numba, rightAlignedText) {

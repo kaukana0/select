@@ -27,7 +27,8 @@ const ms = {
 		list: 'DropdownList',           		// list below the box; initially invisible
 		listItemPrefix: 'ListItem',				// prefix for ids
 		listContainer: 'listContainer',
-		btn: "btn"
+		btn: "btn",
+		btnC: "btnContainer"
 	},
 }
 
@@ -540,11 +541,10 @@ class Element extends HTMLElement {
 	}
 
 	#updateResetButton() {
-		this.#$(ms.domElementIds.btn).style.display = this.#_hasReset===true && !this.#isDefaultSelected() ?"inline-block":"none"
+		this.#$(ms.domElementIds.btnC).style.display = this.#_hasReset===true && !this.#isDefaultSelected() ?"inline-block":"none"
 	}
 
 	#isDefaultSelected() {
-		console.log(this.#_defaultSelections.length)
 		if(this.#_defaultSelections.length === 0) {
 			// anything else then the 1st one selected?
 			var items = this.#$(ms.domElementIds.list).getElementsByTagName("li");
@@ -559,8 +559,7 @@ class Element extends HTMLElement {
 			if(this.#_selected.size === this.#_defaultSelections.size) {
 				
 				let retVal = true
-				for (let [key, val] of this.#_selected) {
-					console.log(key, val)
+				for (let [key, _] of this.#_selected) {
 					if(!this.#_defaultSelections.includes(key)) {retVal=false}
 				}
 				return retVal
@@ -569,7 +568,6 @@ class Element extends HTMLElement {
 				return false
 			}
 		}
-		return true
 	}
 
 }
