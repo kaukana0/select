@@ -91,12 +91,12 @@ export default class MarkUpCode {
 			border: none;
 			z-index: ${zIndex};
 			max-height: 400px;
-			top: 45px;
+			top: 43px;
 			margin-left: 0px;
 			margin-right: 0px;
 			//padding-left: 0.3em;
-			left: -2px;
-			width: calc(100% + 4px);
+			left: -1px;
+			width: calc(100% + 2px);
 			position: absolute;
 			text-align: left;
 			font-weight: normal;
