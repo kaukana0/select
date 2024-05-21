@@ -33,12 +33,17 @@ export default class MarkUpCode {
 
 			//margin-left: 1px;
 			//margin-right: 1px;
-			border: 2px solid #0e47cb;
+			border: 1px solid #515560;
 			background-color: #fff;
 			border-radius: 4px;
 		  box-shadow: inset 0 2px 4px rgba(9,49,142,.08),inset 0 0 10px rgba(9,49,142,.04),inset 0 4px 5px rgba(9,49,142,.04),inset 0 -4px 4px rgba(9,49,142,.04);
 
 		}
+
+		#${ms.domElementIds.headBox}:hover {
+			/*border-color: #515560;*/
+		}
+
 		
 		#${ms.domElementIds.headBoxContent} {
 			height: 1.8em;
@@ -66,13 +71,17 @@ export default class MarkUpCode {
 			text-align: center;
 			position: absolute;
 			width: 44px;
-			height: 44px;
+			height: 42px;
 			background: #0E47CB;
 			right: 0px;
 			border: 0px;
 			border-top-right-radius: 3px;
 			border-bottom-right-radius: 3px;
 			pointer-events: none;
+		}
+
+		#${ms.domElementIds.headBox}:hover:after {
+			background-color: #3e6cd5;
 		}
 
 		#${ms.domElementIds.listContainer} {
@@ -112,7 +121,7 @@ export default class MarkUpCode {
 			padding-left: 0.3em;
 			padding-right: 0.3em;
 			line-height: 1.8rem;
-			padding: 12px 16px 12px 16px;
+			padding: 5px 16px 5px 16px;
 		}
 		
 		#${ms.domElementIds.list} li:hover {
@@ -173,10 +182,16 @@ export default class MarkUpCode {
 			font: normal normal 400 1.0rem Arial,sans-serif;
 			white-space: pre-wrap;
 			vertical-align: baseline;
+			align-items: center;
 			margin-top: 2px;
 			margin-bottom: 2px;
 
 			line-height: 2rem;
+		}
+
+		// doesn't work for checkbox border
+		.item:hover {
+			border-color: #3e6cd5;
 		}
 
 		.indented {
@@ -210,7 +225,25 @@ export default class MarkUpCode {
 			color: #fff;
 			width: 80%;
 			min-height: 2.5rem;
-			margin: 5px 0 5px 0;
+			margin: 3px 0 3px 0;
+			font-size: 1rem;
+			}
+			
+			#${ms.domElementIds.btn}:hover {
+				background-color: #3e6cd5;
+				border-color: #3e6cd5;
+				color: #fff;
+				box-shadow: 0 2px 4px rgba(9, 49, 142, 0.08),
+				0 0 10px rgba(9, 49, 142, 0.04), 0 4px 5px rgba(9, 49, 142, 0.04),
+				0 -4px 4px rgba(9, 49, 142, 0.04);
+				text-decoration: none;
+			}
+
+			hr {
+				width:90%; 
+				//color:#cfdaf5;
+				color: darkgrey;
+				border-top:0;
 			}
 
 		</style>`
@@ -246,13 +279,6 @@ export default class MarkUpCode {
 		input[type="checkbox"]:checked:before {
 			content:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' viewBox='0 0 24 24' focusable='false' aria-hidden='true' %3E %3Cpath fill='white' d='m19.2 6.4-9.9 9.9-3.5-3.6c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l4.2 4.2c.4.4 1 .4 1.4 0L20.6 7.8c.4-.4.4-1 0-1.4-.2-.2-.5-.3-.7-.3-.3 0-.5.1-.7.3z'%3E%3C/path%3E%3C/svg%3E");
 		}
-
-		hr {
-			width:90%; 
-			//color:#cfdaf5;
-			color: darkgrey;
-			border-top:0;
-		}
 		</style>`
 
 
@@ -263,7 +289,7 @@ export default class MarkUpCode {
 	// just for 1 row. a means to have a right column which is left aligned.
 	static grid(fractions, content) {
 		return `
-			<div style="display: grid; grid-template-columns: ${fractions}fr 1fr;">
+			<div style="display: grid; grid-template-columns: ${fractions}fr 1fr;  align-items: center;">
 				${content}
 			</div>
 		`
