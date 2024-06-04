@@ -21,6 +21,13 @@ export default class MarkUpCode {
 
 	static css(ms, zIndex) {
 		const theBoxItself = `<style>
+
+
+		.rotate-180 {
+			transform: rotate(180deg);
+			transition: transform .3s ease-in-out;
+		}
+
 		#${ms.domElementIds.headBox} {
 			position:relative;
 			display: flex;
@@ -78,6 +85,11 @@ export default class MarkUpCode {
 			border-top-right-radius: 3px;
 			border-bottom-right-radius: 3px;
 			pointer-events: none;
+			transition: transform .3s ease-in-out;
+		}
+
+		#${ms.domElementIds.headBox}.pointUp::after {
+			content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-35 -38 42 42' width='100%' height='35px' stroke='white' fill='white' %3E%3Cpath d='M18.2 17.147c.2.2.4.3.7.3.3 0 .5-.1.7-.3.4-.4.4-1 0-1.4l-7.1-7.1c-.4-.4-1-.4-1.4 0l-7 7c-.3.4-.3 1 .1 1.4.4.4 1 .4 1.4 0l6.2-6.2 6.4 6.3z' stroke-linecap='butt' stroke-width='0.1' stroke-linejoin='round' transition='transform .1 ease-in-out' transform-box='fill-box' transform-origin='1500 -1500.5' transform='rotate(1)'     /%3E%3C/svg%3E")
 		}
 
 		#${ms.domElementIds.headBox}:hover:after {

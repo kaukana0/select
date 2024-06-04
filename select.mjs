@@ -78,13 +78,13 @@ class Element extends HTMLElement {
 	}
 
 	#registerEvents() {
-			this.#$(ms.domElementIds.headBox).addEventListener('click', (ev) => this.#toggleVisibility(ev))
+			this.#$(ms.domElementIds.headBox).addEventListener('click', (ev) => this.#setVisible())
 			this.#$(ms.domElementIds.headBox).addEventListener('keydown', (e) => {
 				if(e.keyCode == 13 || e.keyCode == 32) {
-					this.#toggleVisibility(e)
+					this.#setVisible()
 				}
 				if(e.keyCode == 27) {
-					this.#$(ms.domElementIds.listContainer).style.display = "none"
+					this.#setVisible(false)
 				}
 		})
 		this.#$(ms.domElementIds.btn).addEventListener('click', (ev) => {
@@ -498,32 +498,44 @@ class Element extends HTMLElement {
 		}
 	}
 
-	#toggleVisibility(ev) {
-		const list = this.#$(ms.domElementIds.listContainer)
-		const isCurrentlyVisible = list.style.display !== "" && list.style.display !== "none"
 
-		if(isCurrentlyVisible) {list.style.display = "none"} else {list.style.display = "block"}
-		if(!this.#_isMultiselect && isCurrentlyVisible) {
-			const selEl = this.#getCurrentlySingleSelectedElement()
-			//if(selEl) { selEl.scrollIntoView() }
-			// note: the list stores where it was last scrolled to.
-			// so, if for instance, you select the first item and scroll all the way down,
-			// without this, it would stay down, with this, it's scrolled topmost
+	/*
+		note on changing CSS for pseudo elements:
+		style.add / remove doesn't exist for pseudo elements.
+		while there is getComputedStyle, setComputedStyle is missing.
+	*/
+	#setVisible(is) {
+		console.log("YO", is, typeof is)
+		console.trace()
+		const list = this.#$(ms.domElementIds.listContainer)
+		let isCurrentlyVisible = list.style.display !== "" && list.style.display !== "none"
+	
+		if(typeof is === "undefined") {
+			// toggle
+			list.style.display = isCurrentlyVisible ? "none" : "block"
+		} else {
+			list.style.display = is ? "block" : "none"
 		}
 
-		//if(ev) { ev.stopPropagation() }
-	
-		// note: clicks anywhere else other than this component are handled under dismissability
+		isCurrentlyVisible = list.style.display !== "" && list.style.display !== "none"
+
+		if(isCurrentlyVisible) {
+			this.#$(ms.domElementIds.headBox).classList.add("pointUp")
+		} else {
+			this.#$(ms.domElementIds.headBox).classList.remove("pointUp")
+		}
 	}
+
 
 	#makeDismissable() {
 		// note: use element in light DOM, not any element from inside this component
-		document.addEventListener('click', (e) => {
+		document.addEventListener('click', function(e) {
 			if(e.target.id != this.id) {
-				const el = this.#$(ms.domElementIds.listContainer)
-				el.style.display = "none"
+				//const el = this.#$(ms.domElementIds.listContainer)
+				//el.style.display = "none"
+				this.#setVisible(false)
 			}
-		})
+		}.bind(this))
 	}
 
 	selectDefaults() {
