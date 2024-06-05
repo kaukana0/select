@@ -505,8 +505,6 @@ class Element extends HTMLElement {
 		while there is getComputedStyle, setComputedStyle is missing.
 	*/
 	#setVisible(is) {
-		console.log("YO", is, typeof is)
-		console.trace()
 		const list = this.#$(ms.domElementIds.listContainer)
 		let isCurrentlyVisible = list.style.display !== "" && list.style.display !== "none"
 	
