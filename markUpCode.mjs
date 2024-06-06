@@ -32,23 +32,15 @@ export default class MarkUpCode {
 			position:relative;
 			display: flex;
 			cursor: pointer;
-			height: 40px;
+			height: 46px;
 			align-items: center;
-			//padding: 0.2em;
-			/*font-weight: bold;*/
 			font-size: 1rem;
 
-			//margin-left: 1px;
-			//margin-right: 1px;
 			border: 1px solid #515560;
 			background-color: #fff;
 			border-radius: 4px;
 		  box-shadow: inset 0 2px 4px rgba(9,49,142,.08),inset 0 0 10px rgba(9,49,142,.04),inset 0 4px 5px rgba(9,49,142,.04),inset 0 -4px 4px rgba(9,49,142,.04);
 
-		}
-
-		#${ms.domElementIds.headBox}:hover {
-			/*border-color: #515560;*/
 		}
 
 		
@@ -78,7 +70,7 @@ export default class MarkUpCode {
 			text-align: center;
 			position: absolute;
 			width: 44px;
-			height: 42px;
+			height: 46px;
 			background: #0E47CB;
 			right: 0px;
 			border: 0px;
@@ -103,7 +95,7 @@ export default class MarkUpCode {
 			border: none;
 			z-index: ${zIndex};
 			max-height: 400px;
-			top: 43px;
+			top: 47px;
 			margin-left: 0px;
 			margin-right: 0px;
 			//padding-left: 0.3em;
@@ -145,22 +137,6 @@ export default class MarkUpCode {
 			background-color: #044aa308;
 		}
 
-		/* after the first child
-		[dropdown-item-checked] ::after {
-			position: absolute;
-			right: 0.8rem;
-			margin-top: 1px;
-			content: '';
-			width: 6px;
-			height: 12px;
-			border-bottom: 3px solid #666;
-			border-right: 3px solid #666;
-			transform: rotate(45deg);
-			-o-transform: rotate(45deg);
-			-ms-transform: rotate(45deg);
-			-webkit-transform: rotate(45deg);
-			border-color: black;
-		}*/
 
 		.count {
 			align-items: center;
@@ -198,7 +174,15 @@ export default class MarkUpCode {
 			margin-top: 2px;
 			margin-bottom: 2px;
 
-			line-height: 2rem;
+			line-height: 34px;
+		}
+
+		.singleitem {
+			display: flex;
+			align-items: center;
+
+			color: #171A22;
+			height: 40px;
 		}
 
 		// doesn't work for checkbox border
@@ -309,7 +293,7 @@ export default class MarkUpCode {
 
 	static singleSelectItem(ms, key, val, enabled=true, fractions=3) {
 		return `
-			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable role="option">
+			<li id="${ms.domElementIds.listItemPrefix}${key}" class="singleitem" key="${key}" val="${val}" tabindex="0" isSelectable role="option">
 				${MarkUpCode.grid(fractions, `<div>${val}</div>`)}
 			</li>
 		`
