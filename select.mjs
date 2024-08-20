@@ -79,7 +79,10 @@ class Element extends HTMLElement {
 					this.#toggleVisibility(e)
 				}
 				if(e.keyCode == 27) {
-					this.#$(ms.domElementIds.list).style.display = "none"
+					if(this.#isCurrentlyVisible()) {
+						this.#$(ms.domElementIds.list).style.display = "none"
+						e.stopPropagation()
+					}
 				}
 		})
 	}
@@ -474,12 +477,16 @@ class Element extends HTMLElement {
 		}
 	}
 
+	#isCurrentlyVisible() {
+		const list = this.#$(ms.domElementIds.list)
+		return list.style.display !== "" && list.style.display !== "none"
+	} 
+
 	#toggleVisibility(ev) {
 		const list = this.#$(ms.domElementIds.list)
-		const isCurrentlyVisible = list.style.display !== "" && list.style.display !== "none"
 
-		if(isCurrentlyVisible) {list.style.display = "none"} else {list.style.display = "block"}
-		if(!this.#_isMultiselect && isCurrentlyVisible) {
+		if(this.#isCurrentlyVisible()) {list.style.display = "none"} else {list.style.display = "block"}
+		if(!this.#_isMultiselect && this.#isCurrentlyVisible()) {
 			const selEl = this.#getCurrentlySingleSelectedElement()
 			//if(selEl) { selEl.scrollIntoView() }
 			// note: the list stores where it was last scrolled to.
@@ -515,6 +522,11 @@ class Element extends HTMLElement {
 			}
 		}
 	}
+
+	focus() {
+		this.#$(ms.domElementIds.headBox).focus()
+	}
+
 
 }
 
