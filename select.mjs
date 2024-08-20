@@ -501,7 +501,6 @@ class Element extends HTMLElement {
 
 	#isCurrentlyVisible() {
 		const list = this.#$(ms.domElementIds.listContainer)
-		console.log(list,"|"+list.style.display+"|")
 		return list.style.display !== "" && list.style.display !== "none"
 	} 
 
