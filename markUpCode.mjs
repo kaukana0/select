@@ -9,37 +9,47 @@ export default class MarkUpCode {
 		return `
 		<div id='${ms.domElementIds.headBox}' tabindex="0">
 		  <div id='${ms.domElementIds.headBoxContent}' style="display:flex; align-items:center;">&varnothing;</div>
-		  <ul id='${ms.domElementIds.list}'></ul>
+			<div id='${ms.domElementIds.listContainer}'>
+				<ul id='${ms.domElementIds.list}'></ul>
+				<center id='${ms.domElementIds.btnC}'>
+					<button id='${ms.domElementIds.btn}' type="button">Reset</button>
+				</center>
+			</div>
 		</div>
 		`
 	}
 
 	static css(ms, zIndex) {
 		const theBoxItself = `<style>
+
+
+		.rotate-180 {
+			transform: rotate(180deg);
+			transition: transform .3s ease-in-out;
+		}
+
 		#${ms.domElementIds.headBox} {
 			position:relative;
 			display: flex;
 			cursor: pointer;
-			height: 37px;
+			height: 46px;
 			align-items: center;
-			padding: 0.2em;
-			/*font-weight: bold;*/
 			font-size: 1rem;
 
-			margin-left: 1px;
-			margin-right: 1px;
 			border: 1px solid #515560;
 			background-color: #fff;
-			border-radius: 3px;
+			border-radius: 4px;
 		  box-shadow: inset 0 2px 4px rgba(9,49,142,.08),inset 0 0 10px rgba(9,49,142,.04),inset 0 4px 5px rgba(9,49,142,.04),inset 0 -4px 4px rgba(9,49,142,.04);
 
 		}
+
 		
 		#${ms.domElementIds.headBoxContent} {
 			height: 1.8em;
 			width: 100%;
 			overflow: hidden;
-			margin-left: 0.3em;
+			//margin-left: 0.3em;
+			padding-left: 14px;
 			text-align: left;
 			color: #141517;
 		}
@@ -60,33 +70,54 @@ export default class MarkUpCode {
 			text-align: center;
 			position: absolute;
 			width: 44px;
-			height: 43px;
+			height: 46px;
 			background: #0E47CB;
 			right: 0px;
 			border: 0px;
 			border-top-right-radius: 3px;
 			border-bottom-right-radius: 3px;
 			pointer-events: none;
+			transition: transform .3s ease-in-out;
 		}
 
-		#${ms.domElementIds.list} {
+		#${ms.domElementIds.headBox}.pointUp::after {
+			content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-35 -38 42 42' width='100%' height='35px' stroke='white' fill='white' %3E%3Cpath d='M18.2 17.147c.2.2.4.3.7.3.3 0 .5-.1.7-.3.4-.4.4-1 0-1.4l-7.1-7.1c-.4-.4-1-.4-1.4 0l-7 7c-.3.4-.3 1 .1 1.4.4.4 1 .4 1.4 0l6.2-6.2 6.4 6.3z' stroke-linecap='butt' stroke-width='0.1' stroke-linejoin='round' transition='transform .1 ease-in-out' transform-box='fill-box' transform-origin='1500 -1500.5' transform='rotate(1)'     /%3E%3C/svg%3E")
+		}
+
+		#${ms.domElementIds.headBox}:hover:after {
+			background-color: #3e6cd5;
+		}
+
+		#${ms.domElementIds.listContainer} {
 			display: none;
-			list-style: none;
 			background-color: #fff;
-			overflow: auto;
-			border: 1px solid rgba(0,0,0,1);
+			overflow: hidden;
+			border: none;
 			z-index: ${zIndex};
 			max-height: 400px;
-			top: 27px;
+			top: 47px;
 			margin-left: 0px;
 			margin-right: 0px;
-			padding-left: 0.3em;
+			//padding-left: 0.3em;
 			left: -1px;
-			width: 98.5%;
+			width: calc(100% + 2px);
 			position: absolute;
 			text-align: left;
 			font-weight: normal;
 			font-size: 1rem;
+
+			border-radius: 4px;
+			box-shadow: 0 2px 4px rgba(9,49,142,.08),0 0 10px rgba(9,49,142,.04),0 4px 5px rgba(9,49,142,.04),0 -4px 4px rgba(9,49,142,.04);
+			box-sizing: border-box;
+			cursor: default;
+		}
+		
+		#${ms.domElementIds.list} {
+			list-style: none;
+			padding-inline-start: 0;
+			max-height: 300px;
+			overflow: auto;
+			margin:0;
 		}
 		
 		#${ms.domElementIds.list} li {
@@ -94,6 +125,7 @@ export default class MarkUpCode {
 			padding-left: 0.3em;
 			padding-right: 0.3em;
 			line-height: 1.8rem;
+			padding: 5px 16px 5px 16px;
 		}
 		
 		#${ms.domElementIds.list} li:hover {
@@ -105,27 +137,11 @@ export default class MarkUpCode {
 			background-color: #044aa308;
 		}
 
-		/* after the first child
-		[dropdown-item-checked] ::after {
-			position: absolute;
-			right: 0.8rem;
-			margin-top: 1px;
-			content: '';
-			width: 6px;
-			height: 12px;
-			border-bottom: 3px solid #666;
-			border-right: 3px solid #666;
-			transform: rotate(45deg);
-			-o-transform: rotate(45deg);
-			-ms-transform: rotate(45deg);
-			-webkit-transform: rotate(45deg);
-			border-color: black;
-		}*/
 
 		.count {
 			align-items: center;
 			background-color: #0e47cb;
-			border-radius: 50%;
+			border-radius: 12px;
 			color: #fff;
 			display: inline-flex;
 			font: normal normal 400 0.8rem/0.2rem Arial,sans-serif;
@@ -154,10 +170,24 @@ export default class MarkUpCode {
 			font: normal normal 400 1.0rem Arial,sans-serif;
 			white-space: pre-wrap;
 			vertical-align: baseline;
+			align-items: center;
 			margin-top: 2px;
 			margin-bottom: 2px;
 
-			line-height: 2rem;
+			line-height: 34px;
+		}
+
+		.singleitem {
+			display: flex;
+			align-items: center;
+
+			color: #171A22;
+			height: 40px;
+		}
+
+		// doesn't work for checkbox border
+		.item:hover {
+			border-color: #3e6cd5;
 		}
 
 		.indented {
@@ -167,6 +197,50 @@ export default class MarkUpCode {
 		.disabled {
 			color: grey;
 		}
+
+		#${ms.domElementIds.btnC} {
+			display: none;
+			width: 100%;
+			padding: 10px 0 10px 0;
+			border-top: solid 1px;
+			border-color: #cfdaf5;
+		}
+
+		#${ms.domElementIds.btn} {
+			overflow: visible;
+			text-transform: none;
+			appearance: none;
+			background: none;
+			border-radius: 4px;
+			cursor: pointer;
+			margin: 0;
+			min-width: 44px;
+			text-decoration: none;
+			background-color: #0e47cb;
+			border: 2px solid #0e47cb;
+			color: #fff;
+			width: 80%;
+			min-height: 2.5rem;
+			margin: 3px 0 3px 0;
+			font-size: 1rem;
+			}
+			
+			#${ms.domElementIds.btn}:hover {
+				background-color: #3e6cd5;
+				border-color: #3e6cd5;
+				color: #fff;
+				box-shadow: 0 2px 4px rgba(9, 49, 142, 0.08),
+				0 0 10px rgba(9, 49, 142, 0.04), 0 4px 5px rgba(9, 49, 142, 0.04),
+				0 -4px 4px rgba(9, 49, 142, 0.04);
+				text-decoration: none;
+			}
+
+			hr {
+				width:90%; 
+				//color:#cfdaf5;
+				color: darkgrey;
+				border-top:0;
+			}
 
 		</style>`
 
@@ -211,7 +285,7 @@ export default class MarkUpCode {
 	// just for 1 row. a means to have a right column which is left aligned.
 	static grid(fractions, content) {
 		return `
-			<div style="display: grid; grid-template-columns: ${fractions}fr 1fr;">
+			<div style="display: grid; grid-template-columns: ${fractions}fr 1fr;  align-items: center;">
 				${content}
 			</div>
 		`
@@ -219,7 +293,7 @@ export default class MarkUpCode {
 
 	static singleSelectItem(ms, key, val, enabled=true, fractions=3) {
 		return `
-			<li id="${ms.domElementIds.listItemPrefix}${key}" key="${key}" val="${val}" tabindex="0" isSelectable role="option">
+			<li id="${ms.domElementIds.listItemPrefix}${key}" class="singleitem" key="${key}" val="${val}" tabindex="0" isSelectable role="option">
 				${MarkUpCode.grid(fractions, `<div>${val}</div>`)}
 			</li>
 		`
@@ -233,7 +307,7 @@ export default class MarkUpCode {
 				${MarkUpCode.grid(fractions, `
 					<div class="item ${indented?"indented":""}  ${enabled?"":"disabled"}   ">
 						${this.checkbox(enabled)}
-						<p style="margin:2px 10px;">${val}</p>
+						<p style="margin:2px 0 2px 6px;">${val}</p>
 					</div>
 						${favStarHtml}
 						${keyHtml}
@@ -272,17 +346,21 @@ export default class MarkUpCode {
 	// note: transform makes a y-scrollbar appear. it goes away w/ specifying some height.
 	static checkbox(enabled=true, checked=false) {
 		const cl = enabled?"":"border-color:lightgrey;"
-		return `<input ${cl} type='checkbox' ${checked?"checked=true":""} style="pointer-events: none; accent-color: #0e47cb; ${cl}"  aria-selected="${checked?"true":"false"}   ></input>`
+		return `<input ${cl} type='checkbox' ${checked?"checked=true":""} style="pointer-events: none; accent-color: #0e47cb; ${cl}"  aria-selected="${checked?"true":"false"}"></input>`
 	}
 
-	static headBoxContent(text, numba) {
-		let retVal = "<span style='display:flex; align-items:center; margin-top:2px;'>"
+	static headBoxContent(text, numba, rightAlignedText) {
+		let retVal = "<span style='display:flex; align-items:center; flex-grow:1; margin-top:2px;'>"
 		if(numba===null) {
 			retVal += text
 		} else {
 			retVal += this.circledNumber(numba) + text
 		}
-		return retVal+"</span>"
+		retVal+="</span>"
+		if(rightAlignedText != "") {
+			retVal += "<span style='align-items:center; padding-right:50px;'>"+rightAlignedText+"</span>"
+		}
+		return retVal
 	}
 
 	static image(path, key) {

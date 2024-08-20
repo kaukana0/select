@@ -26,7 +26,9 @@ const ms = {
 		headBoxContent: 'headBoxContent',		// mostly the same as a list entry (text and possibly image), possibly styled differently
 		list: 'DropdownList',           		// list below the box; initially invisible
 		listItemPrefix: 'ListItem',				// prefix for ids
-		spacer: 'spacer'						// pushes the little down arrow in the headbox over to the right
+		listContainer: 'listContainer',
+		btn: "btn",
+		btnC: "btnContainer"
 	},
 }
 
@@ -50,6 +52,8 @@ class Element extends HTMLElement {
 	#_textForMultiselect	// what should be displayed if multiple are selected. eg "items selected"
 	#_disabledSelections	// [] of keys
 	#_displayKeys	// bool; from an attribute; for each entry, show it's key in a right-aligned column
+	#_displayKeyInHeadbox		// right aligned
+	#_hasReset
 
 	#$(elementId) {
 		return this.shadowRoot.getElementById(elementId)
@@ -73,17 +77,21 @@ class Element extends HTMLElement {
 	}
 
 	#registerEvents() {
-			this.#$(ms.domElementIds.headBox).addEventListener('click', (ev) => this.#toggleVisibility(ev))
+			this.#$(ms.domElementIds.headBox).addEventListener('click', (ev) => this.#setVisible())
 			this.#$(ms.domElementIds.headBox).addEventListener('keydown', (e) => {
 				if(e.keyCode == 13 || e.keyCode == 32) {
-					this.#toggleVisibility(e)
+					this.#setVisible()
 				}
 				if(e.keyCode == 27) {
 					if(this.#isCurrentlyVisible()) {
-						this.#$(ms.domElementIds.list).style.display = "none"
+						this.#setVisible(false)
 						e.stopPropagation()
 					}
 				}
+		})
+		this.#$(ms.domElementIds.btn).addEventListener('click', (ev) => {
+			this.selectDefaults()
+			this.#invokeCallback()
 		})
 	}
 
@@ -158,7 +166,7 @@ class Element extends HTMLElement {
 
 
 	static get observedAttributes() {
-		return ['data', 'onSelect', 'onSelected', 'multiselect', 'textformultiselect', 'displaykeys', 'fractions']
+		return ['data', 'onSelect', 'onSelected', 'multiselect', 'textformultiselect', 'displaykeys', 'fractions', 'resetbutton', 'displaykeyinheadbox']
 	}
 
 	attributeChangedCallback(name, oldVal, newVal) {
@@ -170,7 +178,8 @@ class Element extends HTMLElement {
 			this.#_isMultiselect = newVal === "true"
 			if(this.#_selected.size > 1) {
 				if(this.#_isMultiselect) {
-					this.#updateHeadBoxContent()	
+					this.#updateHeadBoxContent()
+					this.#updateResetButton()
 				} else {
 					// when being switched off, select first or fav
 					if(this.#_currentFavStar === "") {
@@ -180,7 +189,8 @@ class Element extends HTMLElement {
 					}
 				}
 			} else {
-				this.#updateHeadBoxContent()	
+				this.#updateHeadBoxContent()
+				this.#updateResetButton()
 			}
 		}
 
@@ -189,13 +199,22 @@ class Element extends HTMLElement {
 		}
 
 		if(name === 'displaykeys') {
-			this.displayKeys = newVal === "true"
+			this.#_displayKeys = newVal === "true"
 		}
 
 		if(name === 'fractions') {
 			this.#_fractions = newVal
 			console.error("ecl-like-select-x: setting fractions at runtime is not supported")
 		}
+
+		if(name === 'resetbutton') {
+			this.#_hasReset = newVal==="true"
+		}
+
+		if(name === 'displaykeyinheadbox') {
+			this.#_displayKeyInHeadbox = newVal==="true"
+		}
+		
 	}
 
 	// note: very naive. collision prone!
@@ -373,8 +392,10 @@ class Element extends HTMLElement {
 
 	#updateHeadBoxContent() {
 		const selectedCount = this.#_isMultiselect ? this.#_selected.size : null
-		const text = (this.#_textForMultiselect && this.#_isMultiselect && this.selected.size>1) ? this.#_textForMultiselect : Array.from(this.#_selected.values()).join()
-		const html = MarkUpCode.headBoxContent(text, selectedCount)
+		const useMultiselectText = this.#_textForMultiselect && this.#_isMultiselect && this.selected.size>1
+		const text = useMultiselectText ? this.#_textForMultiselect : Array.from(this.#_selected.values()).join()
+		const rightAlignedText = this.#_displayKeyInHeadbox && !useMultiselectText ? this.selected.keys().next().value : ""
+		const html = MarkUpCode.headBoxContent(text, selectedCount, rightAlignedText)
 		this.#$(ms.domElementIds.headBoxContent).innerHTML = html
 	}
 
@@ -448,6 +469,7 @@ class Element extends HTMLElement {
 		}
 
 		function action() {
+			that.#updateResetButton()
 			that.#updateHeadBoxContent()
 			that.#invokeCallback(key, val)
 		}
@@ -478,35 +500,42 @@ class Element extends HTMLElement {
 	}
 
 	#isCurrentlyVisible() {
-		const list = this.#$(ms.domElementIds.list)
+		const list = this.#$(ms.domElementIds.listContainer)
+		console.log(list,"|"+list.style.display+"|")
 		return list.style.display !== "" && list.style.display !== "none"
 	} 
 
-	#toggleVisibility(ev) {
-		const list = this.#$(ms.domElementIds.list)
-
-		if(this.#isCurrentlyVisible()) {list.style.display = "none"} else {list.style.display = "block"}
-		if(!this.#_isMultiselect && this.#isCurrentlyVisible()) {
-			const selEl = this.#getCurrentlySingleSelectedElement()
-			//if(selEl) { selEl.scrollIntoView() }
-			// note: the list stores where it was last scrolled to.
-			// so, if for instance, you select the first item and scroll all the way down,
-			// without this, it would stay down, with this, it's scrolled topmost
+	/*
+		note on changing CSS for pseudo elements:
+		style.add / remove doesn't exist for pseudo elements.
+		while there is getComputedStyle, setComputedStyle is missing.
+	*/
+	#setVisible(is) {
+		const list = this.#$(ms.domElementIds.listContainer)
+	
+		if(typeof is === "undefined") {
+			// toggle
+			list.style.display = this.#isCurrentlyVisible() ? "none" : "block"
+		} else {
+			list.style.display = is ? "block" : "none"
 		}
 
-		//if(ev) { ev.stopPropagation() }
-	
-		// note: clicks anywhere else other than this component are handled under dismissability
+
+		if(this.#isCurrentlyVisible()) {
+			this.#$(ms.domElementIds.headBox).classList.add("pointUp")
+		} else {
+			this.#$(ms.domElementIds.headBox).classList.remove("pointUp")
+		}
 	}
+
 
 	#makeDismissable() {
 		// note: use element in light DOM, not any element from inside this component
-		document.addEventListener('click', (e) => {
+		document.addEventListener('click', function(e) {
 			if(e.target.id != this.id) {
-				const el = this.#$(ms.domElementIds.list)
-				el.style.display = "none"
+				this.#setVisible(false)
 			}
-		})
+		}.bind(this))
 	}
 
 	selectDefaults() {
@@ -523,10 +552,39 @@ class Element extends HTMLElement {
 		}
 	}
 
+	#updateResetButton() {
+		this.#$(ms.domElementIds.btnC).style.display = this.#_hasReset===true && !this.#isDefaultSelected() ?"inline-block":"none"
+	}
+
+	#isDefaultSelected() {
+		if(this.#_defaultSelections.length === 0) {
+			// anything else then the 1st one selected?
+			var items = this.#$(ms.domElementIds.list).getElementsByTagName("li");
+			for (let i = 1; i < items.length; i++) {
+				if(items[i].hasAttribute("ischeckable") && items[i].firstElementChild.firstElementChild.firstElementChild.hasAttribute("checked")) {
+					return false
+				}
+			}
+			return true
+		} else {
+			
+			if(this.#_selected.size === this.#_defaultSelections.size) {
+				
+				let retVal = true
+				for (let [key, _] of this.#_selected) {
+					if(!this.#_defaultSelections.includes(key)) {retVal=false}
+				}
+				return retVal
+
+			} else {
+				return false
+			}
+		}
+	}
+
 	focus() {
 		this.#$(ms.domElementIds.headBox).focus()
 	}
-
 
 }
 
