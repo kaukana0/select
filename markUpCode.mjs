@@ -94,7 +94,7 @@ export default class MarkUpCode {
 			overflow: hidden;
 			border: none;
 			z-index: ${zIndex};
-			max-height: 400px;
+			max-height: 450px;
 			top: 47px;
 			margin-left: 0px;
 			margin-right: 0px;
@@ -115,7 +115,7 @@ export default class MarkUpCode {
 		#${ms.domElementIds.list} {
 			list-style: none;
 			padding-inline-start: 0;
-			max-height: 300px;
+			max-height: 450px;
 			overflow: auto;
 			margin:0;
 		}
